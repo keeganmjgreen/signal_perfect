@@ -1,4 +1,4 @@
-﻿# Signal*Per$\!\!\;f\!$ect*
+# Signal*Per$\!\!\;f\!$ec$[t]$*
 
 The underlying signal is modeled by a quadratic spline. A spline is a piecewise polynomial. Each piece or segment of the spline is a polynomial and is separated by $x$-values called knots. A spline is subject to constraints such at the knots, the $y$-values of adjacent polynomial pieces are equal such that the pieces meet, and the derivatives of adjacent polynomial pieces are equal such that the spine is smooth and without kinks. The quadratic spline by which the underlying signal is modeled has an extra constraint such that its average value over each interval in the time series is equal to the value of that time series for that interval.
 
