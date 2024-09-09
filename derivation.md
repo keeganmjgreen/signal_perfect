@@ -1,4 +1,4 @@
-# Signal*Per$\!\!\;f\!$ec$[t]$*
+﻿# Signal*Per$\!\!\;f\!$ec$[t]$*
 
 The underlying signal is modeled by a quadratic spline. A spline is a piecewise polynomial. Each piece or segment of the spline is a polynomial and is separated by $x$-values called knots. A spline is subject to constraints such at the knots, the $y$-values of adjacent polynomial pieces are equal such that the pieces meet, and the derivatives of adjacent polynomial pieces are equal such that the spine is smooth and without kinks. The quadratic spline by which the underlying signal is modeled has an extra constraint such that its average value over each interval in the time series is equal to the value of that time series for that interval.
 
@@ -8,17 +8,15 @@ $$ f_i(t) = a_i t^2 + b_i t + c_i $$
 
 We have $3n$ unknowns, and thus need $3n$ equations.
 
-## "Zero-derivative boundary conditions" variant
-
-### Knot constraint
+## Knot constraint
 
 The $y$-values of adjacent quadratic pieces must be equal to each other at each knot such that the pieces meet. Therefore, for all $i$ in $\{1,\dots,n-1\}$:
 
 $$
 \begin{aligned}
-& f_i(x_i)=f_{i+1}(x_i) \\
-& \implies a_i x_i^2 + b_i x_i + c_i = a_{i+1} x_i^2 + b_{i+1} x_i + c_{i+1} \\
-& \implies (-x_i^2) a_i + (-x_i) b_i + (-1) c_i + (x_i^2) a_{i+1} + (x_i) b_{i+1} + (1) c_{i+1} = 0
+& f_i(k_i)=f_{i+1}(k_i) \\
+& \implies a_i k_i^2 + b_i k_i + c_i = a_{i+1} k_i^2 + b_{i+1} k_i + c_{i+1} \\
+& \implies (-k_i^2) a_i + (-k_i) b_i + (-1) c_i + (k_i^2) a_{i+1} + (k_i) b_{i+1} + (1) c_{i+1} = 0
 \end{aligned}
 $$
 
@@ -36,36 +34,36 @@ b1 = np.zeros((n-1, 1))
 $$
 A_1 =
 \begin{bmatrix}
-    -x_1^2 & -x_1 & -1 & x_1^2 & x_1 & 1 & 0 & 0 & 0 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    0 & 0 & 0 & -k4^2 & -x_2 & -1 & x_2^2 & x_2 & 1 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
+    -k_1^2 & -k_1 & -1 & k_1^2 & k_1 & 1 & 0 & 0 & 0 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & -k4^2 & -k_2 & -1 & k_2^2 & k_2 & 1 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
     \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -x_n^2 & -x_n & -1 & x_n^2 & x_n & 1
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -k_n^2 & -k_n & -1 & k_n^2 & k_n & 1
 \end{bmatrix}
 $$
 
 ```python
-A1 = np.array([[0, 0, 0] * (i-1) + [-x[i]**2, -x[i], -1, x[i]**2, x[i], 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
+A1 = np.array([[0, 0, 0] * (i-1) + [-k[i]**2, -k[i], -1, k[i]**2, k[i], 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
 ```
 
-When using `numpy.PPoly`, however, each polynomial piece, regardless of what range on the $x$-axis it spans in the piecewise function,  is expressed in terms of $x$ starting at zero. This is a way of "normalizing" each polynomial and avoiding sensitive coefficients. Thus, the $x_i$ for an $(a_i,b_i,c_i)$ triple is replaced with zero and the $x_i$ for an $(a_{i+1},b_{i+1},c_{i+1})$ triple is replaced with its distance from zero, $x_i-x_{i-1}$, as follows:
+When using `numpy.PPoly`, however, each polynomial piece, regardless of what range on the $x$-axis it spans in the piecewise function,  is expressed in terms of $x$ starting at zero. This is a way of "normalizing" each polynomial and avoiding sensitive coefficients. Thus, the $k_i$ for an $(a_i,b_i,c_i)$ triple is replaced with zero and the $k_i$ for an $(a_{i+1},b_{i+1},c_{i+1})$ triple is replaced with its distance from zero, $k_i-k_{i-1}$, as follows:
 
 $$
 A_1 =
 \begin{bmatrix}
-    -(x_1 - x_0)^2 & -(x_1 - x_0) & -1 & 0 & 0 & 1 & 0 & 0 & 0 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    0 & 0 & 0 & -(x_2 - x_1)^2 & -(x_2 - x_1) & -1 & 0 & 0 & 1 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
+    -(k_1 - k_0)^2 & -(k_1 - k_0) & -1 & 0 & 0 & 1 & 0 & 0 & 0 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & -(k_2 - k_1)^2 & -(k_2 - k_1) & -1 & 0 & 0 & 1 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
     \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -(x_n - x_{n-1})^2 & -(x_n - x_{n-1}) & -1 & 0 & 0 & 1
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -(k_n - k_{n-1})^2 & -(k_n - k_{n-1}) & -1 & 0 & 0 & 1
 \end{bmatrix}
 $$
 
 ```python
-A1 = np.array([[0, 0, 0] * (i-1) + [-(x[i] - x[i-1])**2, -(x[i] - x[i-1]), -1, 0, 0, 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
+A1 = np.array([[0, 0, 0] * (i-1) + [-(k[i] - k[i-1])**2, -(k[i] - k[i-1]), -1, 0, 0, 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
 ```
 
 We need $2n+1$ more equations.
 
-### Knot derivative constraint
+## Knot derivative constraint
 
 The derivatives of adjacent quadratic pieces must be equal to each other at each knot such that the spine is smooth and without kinks. The derivative of quadratic piece $i$ is:
 
@@ -75,9 +73,9 @@ Therefore, for all $i$ in $\{1,\dots,n-1\}$:
 
 $$
 \begin{aligned}
-& f_i'(x_i)=f_{i+1}'(x_i) \\
-& \implies 2 a_i x_i + b_i = 2 a_{i+1} x_i + b_{i+1} \\
-& \implies (-2 x_i) a_i + (-1) b_i + (2 x_i) a_{i+1} + (1) b_{i+1} = 0
+& f_i'(k_i)=f_{i+1}'(k_i) \\
+& \implies 2 a_i k_i + b_i = 2 a_{i+1} k_i + b_{i+1} \\
+& \implies (-2 k_i) a_i + (-1) b_i + (2 k_i) a_{i+1} + (1) b_{i+1} = 0
 \end{aligned}
 $$
 
@@ -92,36 +90,36 @@ b2 = np.zeros((n-1, 1))
 $$
 A_2 =
 \begin{bmatrix}
-    -2 x_1 & -1 & 0 & 2 x_1 & 1 & 0 & 0 & 0 & 0 & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    0 & 0 & 0 & -2 x_2 & -1 & 0 & 2 x_2 & 1 & 0 & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
+    -2 k_1 & -1 & 0 & 2 k_1 & 1 & 0 & 0 & 0 & 0 & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & -2 k_2 & -1 & 0 & 2 k_2 & 1 & 0 & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
     \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -2 x_n & -1 & 0 & 2 x_n & 1 & 0
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -2 k_n & -1 & 0 & 2 k_n & 1 & 0
 \end{bmatrix}
 $$
 
 ```python
-A2 = np.array([[0, 0, 0] * (i-1) + [-2 * x[i], -1, 0, 2 * x[i], 1, 0] + [0, 0, 0] * (n-i-1)  for i in range(1, n)])
+A2 = np.array([[0, 0, 0] * (i-1) + [-2 * k[i], -1, 0, 2 * k[i], 1, 0] + [0, 0, 0] * (n-i-1)  for i in range(1, n)])
 ```
 
-Again, replacing the $x_i$ for each $(a_i,b_i,c_i)$ triple with zero, and replacing the $x_i$ for each $(a_{i+1},b_{i+1},c_{i+1})$ triple with $x_i-x_{i-1}$, yields:
+Again, replacing the $k_i$ for each $(a_i,b_i,c_i)$ triple with zero, and replacing the $k_i$ for each $(a_{i+1},b_{i+1},c_{i+1})$ triple with $k_i-k_{i-1}$, yields:
 
 $$
 A_2 =
 \begin{bmatrix}
-    -2 (x_1 - x_0) & -1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    0 & 0 & 0 & -2 (x_2 - x_1) & -1 & 0 & 0 & 1 & 0 & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
+    -2 (k_1 - k_0) & -1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & -2 (k_2 - k_1) & -1 & 0 & 0 & 1 & 0 & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
     \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -2 (x_n - x_{n-1}) & -1 & 0 & 0 & 1 & 0
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -2 (k_n - k_{n-1}) & -1 & 0 & 0 & 1 & 0
 \end{bmatrix}
 $$
 
 ```python
-A2 = np.array([[0, 0, 0] * (i-1) + [-2 * (x[i] - x[i-1]), -1, 0, 0, 1, 0] + [0, 0, 0] * (n-i-1)  for i in range(1, n)])
+A2 = np.array([[0, 0, 0] * (i-1) + [-2 * (k[i] - k[i-1]), -1, 0, 0, 1, 0] + [0, 0, 0] * (n-i-1)  for i in range(1, n)])
 ```
 
 Now we need $n+2$ more equations.
 
-### Interval average constraint
+## Interval average constraint
 
 The average value of the quadratic spline over each interval in the time series $y[t]$ must be equal to the value of that time series for that interval. The spline's average over an interval is expressed in terms of the definite integral of each quadratic piece divided by the width of the interval. The indefinite integral is:
 
@@ -131,11 +129,11 @@ In the "zero-derivative boundary conditions" variant, the knots separate the int
 
 $$
 \begin{aligned}
-& \text{average over interval } i = \frac{1}{x_i - x_{i-1}} \int_{x_{i-1}}^{x_i} f_i(t) \ \mathrm{d}t = \frac{1}{x_i - x_{i-1}} (F_i(x_i) - F_i(x_{i-1})) = y[i] \\
-& \implies F_i(x_i) - F_i(x_{i-1}) = (x_i - x_{i-1}) \ y[i] \\
-& \implies \left( \frac{a_i}{3} x_i^3 + \frac{b_i}{2} x_i^2 + c_i x_i + C \right) - \left( \frac{a_i}{3} x_{i-1}^3 + \frac{b_i}{2} x_{i-1}^2 + c_i x_{i-1} + C \right) = (x_i - x_{i-1}) \ y[i] \\
-& \implies 2 a_i x_i^3 + 3 b_i x_i^2 + 6 c_i x_i - 2 a_i x_{i-1}^3 - 3 b_i x_{i-1}^2 - 6 c_i x_{i-1} = 6 (x_i - x_{i-1}) \ y[i] \\
-& \implies 2 (x_i^3 - x_{i-1}^3) a_i + 3 (x_i^2 - x_{i-1}^2) b_i + 6 (x_i - x_{i-1}) c_i = 6 (x_i - x_{i-1}) \ y[i]
+& \text{average over interval } i = \frac{1}{k_i - k_{i-1}} \int_{k_{i-1}}^{k_i} f_i(t) \ \mathrm{d}t = \frac{1}{k_i - k_{i-1}} (F_i(k_i) - F_i(k_{i-1})) = y[i] \\
+& \implies F_i(k_i) - F_i(k_{i-1}) = (k_i - k_{i-1}) \ y[i] \\
+& \implies \left( \frac{a_i}{3} k_i^3 + \frac{b_i}{2} k_i^2 + c_i k_i + C \right) - \left( \frac{a_i}{3} k_{i-1}^3 + \frac{b_i}{2} k_{i-1}^2 + c_i k_{i-1} + C \right) = (k_i - k_{i-1}) \ y[i] \\
+& \implies 2 a_i k_i^3 + 3 b_i k_i^2 + 6 c_i k_i - 2 a_i k_{i-1}^3 - 3 b_i k_{i-1}^2 - 6 c_i k_{i-1} = 6 (k_i - k_{i-1}) \ y[i] \\
+& \implies 2 (k_i^3 - k_{i-1}^3) a_i + 3 (k_i^2 - k_{i-1}^2) b_i + 6 (k_i - k_{i-1}) c_i = 6 (k_i - k_{i-1}) \ y[i]
 \end{aligned}
 $$
 
@@ -144,58 +142,60 @@ This represents another $n$ linear equations, which can be expressed in the form
 $$
 \mathbf{b}_3 =
 \begin{bmatrix}
-    6 (x_1 - x_0) \ y[1] \\
-    6 (x_2 - x_1) \ y[2] \\
+    6 (k_1 - k_0) \ y[1] \\
+    6 (k_2 - k_1) \ y[2] \\
     \dots \\
-    6 (x_n - x_{n-1}) \ y[n]
+    6 (k_n - k_{n-1}) \ y[n]
 \end{bmatrix}
 $$
 
 ```python
-b3 = np.array([[6 * y[i] * (x[i] - x[i-1])] for i in range(1, n+1)])
+b3 = np.array([[6 * y[i] * (k[i] - k[i-1])] for i in range(1, n+1)])
 ```
 
 $$
 A_3 =
 \begin{bmatrix}
-    2 (x_1^3 - x_0^3) & 3 (x_1^2 - x_0^2) & 6 (x_1 - x_0) & 0 & 0 & 0 & \dots & 0 & 0 & 0 \\
-    0 & 0 & 0 & 2 (x_2^3 - x_1^3) & 3 (x_2^2 - x_1^2) & 6 (x_2 - x_1) & \dots & 0 & 0 & 0 \\
+    2 (k_1^3 - k_0^3) & 3 (k_1^2 - k_0^2) & 6 (k_1 - k_0) & 0 & 0 & 0 & \dots & 0 & 0 & 0 \\
+    0 & 0 & 0 & 2 (k_2^3 - k_1^3) & 3 (k_2^2 - k_1^2) & 6 (k_2 - k_1) & \dots & 0 & 0 & 0 \\
     \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
-    0 & 0 & 0 & 0 & 0 & 0 & \dots & 2 (x_n^3 - x_{n-1}^3) & 3 (x_n^2 - x_{n-1}^2) & 6 (x_n - x_{n-1})
+    0 & 0 & 0 & 0 & 0 & 0 & \dots & 2 (k_n^3 - k_{n-1}^3) & 3 (k_n^2 - k_{n-1}^2) & 6 (k_n - k_{n-1})
 \end{bmatrix}
 $$
 
 ```python
-A3 = np.array([[0, 0, 0] * (i-1) + [2 * (x[i]**3 - x[i-1]**3), 3 * (x[i]**2 - x[i-1]**2), 6 * (x[i] - x[i-1])] + [0, 0, 0] * (n-i) for i in range(1, n+1)])
+A3 = np.array([[0, 0, 0] * (i-1) + [2 * (k[i]**3 - k[i-1]**3), 3 * (k[i]**2 - k[i-1]**2), 6 * (k[i] - k[i-1])] + [0, 0, 0] * (n-i) for i in range(1, n+1)])
 ```
 
-Replacing the $x_i$ and $x_{i+1}$ for each $(a_i,b_i,c_i)$ triple with zero and $x_i-x_{i-1}$ respectively yields:
+Replacing the $k_i$ and $k_{i+1}$ for each $(a_i,b_i,c_i)$ triple with zero and $k_i-k_{i-1}$ respectively yields:
 
 $$
 A_3 =
 \begin{bmatrix}
-    2 (x_1 - x_0)^3 & 3 (x_1 - x_0)^2 & 6 (x_1 - x_0) & 0 & 0 & 0 & \dots & 0 & 0 & 0 \\
-    0 & 0 & 0 & 2 (x_2 - x_1)^3 & 3 (x_2 - x_1)^2 & 6 (x_2 - x_1) & \dots & 0 & 0 & 0 \\
+    2 (k_1 - k_0)^3 & 3 (k_1 - k_0)^2 & 6 (k_1 - k_0) & 0 & 0 & 0 & \dots & 0 & 0 & 0 \\
+    0 & 0 & 0 & 2 (k_2 - k_1)^3 & 3 (k_2 - k_1)^2 & 6 (k_2 - k_1) & \dots & 0 & 0 & 0 \\
     \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
-    0 & 0 & 0 & 0 & 0 & 0 & \dots & 2 (x_n - x_{n-1})^3 & 3 (x_n - x_{n-1})^2 & 6 (x_n - x_{n-1})
+    0 & 0 & 0 & 0 & 0 & 0 & \dots & 2 (k_n - k_{n-1})^3 & 3 (k_n - k_{n-1})^2 & 6 (k_n - k_{n-1})
 \end{bmatrix}
 $$
 
 ```python
-A3 = np.array([[0, 0, 0] * (i-1) + [2 * (x[i] - x[i-1])**3, 3 * (x[i] - x[i-1])**2, 6 * (x[i] - x[i-1])] + [0, 0, 0] * (n-i) for i in range(1, n+1)])
+A3 = np.array([[0, 0, 0] * (i-1) + [2 * (k[i] - k[i-1])**3, 3 * (k[i] - k[i-1])**2, 6 * (k[i] - k[i-1])] + [0, 0, 0] * (n-i) for i in range(1, n+1)])
 ```
 
-(While it includes $x_i$ terms, the same substitution in $\mathbf{b}_3$ results in no change.)
+(While it includes $k_i$ terms, the same substitution in $\mathbf{b}_3$ results in no change.)
 
 Now we need $2$ more equations, from two boundary conditions.
 
-### Boundary conditions
+## Boundary conditions
 
-In the "zero-derivative boundary conditions" variant, the slope of the spline's endpoints are prescribed to be zero. Therefore,
+### "Zero-slope boundary conditions" variant
 
-$$ f_1'(x_0) = 0 \implies 2 a_1 x_0 + b_1 = 0 $$
+In the "zero-slope boundary conditions" variant, the slope (first derivative) of the spline's endpoints are prescribed to be zero. Therefore,
 
-$$ f_n'(x_n) = 0 \implies 2 a_n x_n + b_n = 0 $$
+$$ f_1'(k_0) = 0 \implies 2 a_1 k_0 + b_1 = 0 $$
+
+$$ f_n'(k_n) = 0 \implies 2 a_n k_n + b_n = 0 $$
 
 This represents another $2$ linear equations, which can be expressed in the form $A_4\mathbf{x}=\mathbf{b}_4$, where $\mathbf{x}$ is the same as before and:
 
@@ -208,113 +208,47 @@ b4 = np.array([[0], [0]])
 $$
 A_4 =
 \begin{bmatrix}
-    2 x_0 & 1 & 0 & \cdots & 0 & 0 & 0 \\
-    0 & 0 & 0 & \cdots & 2 x_n & 1 & 0
+    2 k_0 & 1 & 0 & \cdots & 0 & 0 & 0 \\
+    0 & 0 & 0 & \cdots & 2 k_n & 1 & 0
 \end{bmatrix}
 $$
 
 ```python
-A4 = np.array([[2 * x[0], 1, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2 * x[n], 1, 0]])
+A4 = np.array([[2 * k[0], 1, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2 * k[n], 1, 0]])
 ```
 
-Replacing $x_0$ and $x_n$ with zero and $x_n-x_{n-1}$ respectively yields:
+Replacing $k_0$ and $k_n$ with zero and $k_n-k_{n-1}$ respectively yields:
 
 $$
 A_4 =
 \begin{bmatrix}
     0 & 1 & 0 & \cdots & 0 & 0 & 0 \\
-    0 & 0 & 0 & \cdots & 2 (x_n - x_{n-1}) & 1 & 0
+    0 & 0 & 0 & \cdots & 2 (k_n - k_{n-1}) & 1 & 0
 \end{bmatrix}
 $$
 
 ```python
-A4 = np.array([[0, 1, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2 * (x[n] - x[n-1]), 1, 0]])
+A4 = np.array([[0, 1, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2 * (k[n] - k[n-1]), 1, 0]])
 ```
 
-## Zero-second-derivative boundary conditions
+### "Zero-curvature boundary conditions" variant
 
-The knot and knot derivative constraints are the same as before, except there are $n$ equations for each (one more than before) and any knot $x_i$ is replaced by the following:
+In the "zero-curvature boundary conditions" variant, the curvature (second derivative) of the spline's endpoints are prescribed to be zero. Therefore,
 
-$$ \frac{x_{i+1} + x_i}{2} $$
+$$ f_1''(k_0) = 0 \implies 2 a_1 = 0 $$
 
-In which $x_i$ will no longer represent a knot (which is now at the midpoint of each interval) but will still divide intervals. A shorthand $x_{i+0.5}$ will be used for the above expression.
+$$ f_n''(k_n) = 0 \implies 2 a_n = 0 $$
 
-For example, $x_1$ will be replaced by $\frac{x_2 + x_1}{2}$ for which the shorthand $x_{1.5}$ will be used.
-
-Knot constraint:
-
-```python
-A1 = np.array([[0, 0, 0] * (i-1) + [-(x[i+1] + x[i])**2, -2 * (x[i+1] + x[i]), -4, (x[i+1] + x[i])**2, 2 * (x[i+1] + x[i]), 4] + [0, 0, 0] * (n-i-1) for i in range(0, n)])
-```
-
-```python
-A1 = np.array([[0, 0, 0] * (i-1) + [-(x[i+1] - x[i])**2, -2 * (x[i+1] - x[i]), -4, 0, 0, 4] + [0, 0, 0] * (n-i-1) for i in range(0, n)])
-```
-
-Knot derivative constraint:
-
-```python
-A2 = np.array([[0, 0, 0] * (i-1) + [-(x[i+1] + x[i]), -1, 0, (x[i+1] + x[i]), 1, 0] + [0, 0, 0] * (n-i-1)  for i in range(0, n)])
-```
-
-```python
-A2 = np.array([[0, 0, 0] * (i-1) + [-(x[i+1] - x[i]), -1, 0, 0, 1, 0] + [0, 0, 0] * (n-i-1)  for i in range(0, n)])
-```
-
-### Interval average constraint
-
-For all $i$ in $\{0,\dots,n-1\}$:
+This represents another $2$ linear equations, which can be expressed in the form $A_4\mathbf{x}=\mathbf{b}_4$, where $\mathbf{x}$ is the same as before, $\mathbf{b}_4$ is the same as above, and:
 
 $$
-\begin{aligned}
-& \text{average over interval } i = \frac{1}{x_{i+1} - x_i} [(F_{i+1}(x_{i+1}) - F_{i+1}(x_{i+0.5})) + (F_i(x_i) - F_i(x_{i+0.5}))] = y[i] \\
-& \implies \frac{1}{x_{i+1} - x_i} \left[ \left( \left( \frac{a_{i+1}}{3} x_i^3 + \frac{b_{i+1}}{2} x_i^2 + c_{i+1} x_i \right) - \left( \frac{a_{i+1}}{3} x_{i+0.5}^3 + \frac{b_{i+1}}{2} x_{i+0.5}^2 + c_{i+1} x_{i+0.5} \right) \right) + \left( \left( \frac{a_i}{3} x_{i+0.5}^3 + \frac{b_i}{2} x_{i+0.5}^2 + c_i x_{i+0.5} \right) - \left( \frac{a_i}{3} x_i^3 + \frac{b_i}{2} x_i^2 + c_i x_i \right) \right) \right] = y[i] \\
-& \implies 2 a_{i+1} x_{i+1}^3 + 3 b_{i+1} x_{i+1}^2 + 6 c_{i+1} x_{i+1} - 2 a_{i+1} x_{i+0.5}^3 - 3 b_{i+1} x_{i+0.5}^2 - 6 c_{i+1} x_{i+0.5} + 2 a_i x_{i+0.5}^3 + 3 b_i x_{i+0.5}^2 + 6 c_i x_{i+0.5} - 2 a_i x_i^3 - 3 b_i x_i^2 - 6 c_i x_i = 6 (x_{i+1} - x_i) \ y[i] \\
-& \implies 2 (x_{i+1}^3 - x_{i+0.5}^3) a_{i+1} + 3 (x_{i+1}^2 - x_{i+0.5}^2)  b_{i+1} + 6 (x_{i+1} - x_{i+0.5}) c_{i+1} + 2 (x_{i+0.5}^3 - x_i^3)  a_i + 3 (x_{i+0.5}^2 - x_i^2) b_i + 6 (x_{i+0.5} - x_i) c_i = 6 (x_{i+1} - x_i) \ y[i]
-\end{aligned}
-$$
-
-This represents $n+1$ linear equations, which can be expressed in the form $A_3\mathbf{x}=\mathbf{b}_3$, where $\mathbf{x}$ is the same as before and:
-
-$$
-\mathbf{b}_3 =
+A_4 =
 \begin{bmatrix}
-    6 (x_1 - x_0) \ y[1] \\
-    6 (x_2 - x_1) \ y[2] \\
-    \dots \\
-    6 (x_n - x_{n-1}) \ y[n]
+    2 & 0 & 0 & \cdots & 0 & 0 & 0 \\
+    0 & 0 & 0 & \cdots & 2 & 0 & 0
 \end{bmatrix}
 $$
 
-$$
-A_3 =
-\begin{bmatrix}
-    2 (x_{0.5}^3 - x_0^3) & 3 (x_{0.5}^2 - x_0^2) & 6 (x_{0.5} - x_0) & 2 (x_1^3 - x_{0.5}^3) & 3 (x_1^2 - x_{0.5}^2) & 6 (x_1 - x_{0.5}) & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-    0 & 0 & 0 & 0 & 0 & 0 & \dots & 2 (x_{n-0.5}^3 - x_{n-1}^3) & 3 (x_{n-0.5}^2 - x_{n-1}^2) & 6 (x_{n-0.5} - x_{n-1}) & 2 (x_n^3 - x_{n-0.5}^3) & 3 (x_n^2 - x_{n-0.5}^2) & 6 (x_n - x_{n-0.5})
-\end{bmatrix}
-$$
-
-(The second row has been omitted here for brevity.)
-
-$$
-A_3 =
-\begin{bmatrix}
-    2 (x_{0.5}^3 - x_0^3) & 3 (x_{0.5}^2 - x_0^2) & 6 (x_{0.5} - x_0) & 2 (x_1 - x_{0.5})^3 & 3 (x_1 - x_{0.5})^2 & 6 (x_1 - x_{0.5}) & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-    0 & 0 & 0 & 0 & 0 & 0 & \dots & 2 (x_{n-0.5}^3 - x_{n-1}^3) & 3 (x_{n-0.5}^2 - x_{n-1}^2) & 6 (x_{n-0.5} - x_{n-1}) & 2 (x_n - x_{n-0.5})^3 & 3 (x_n - x_{n-0.5})^2 & 6 (x_n - x_{n-0.5})
-\end{bmatrix}
-$$
-
-$$
-A_3 =
-\begin{bmatrix}
-    2 (((x_1 + x_0) / 2)^3 - x_0^3) & 3 (((x_1 + x_0) / 2)^2 - x_0^2) & 3 (x_1 - x_0) & 2 (x_1 - ((x_1 + x_0) / 2))^3 & 3 (x_1 - ((x_1 + x_0) / 2))^2 & 6 (x_1 - ((x_1 + x_0) / 2)) & \dots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-    0 & 0 & 0 & 0 & 0 & 0 & \dots & 2 (((x_n + x_{n-1}) / 2)^3 - x_{n-1}^3) & 3 (((x_n + x_{n-1}) / 2)^2 - x_{n-1}^2) & 6 (((x_n + x_{n-1}) / 2) - x_{n-1}) & 2 (x_n - ((x_n + x_{n-1}) / 2))^3 & 3 (x_n - ((x_n + x_{n-1}) / 2))^2 & 6 (x_n - ((x_n + x_{n-1}) / 2))
-\end{bmatrix}
-$$
-
-### Boundary conditions
-
-TODO
+```python
+A4 = np.array([[2, 0, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2, 0, 0]])
+```
