@@ -7,9 +7,7 @@ import pandas as pd
 pd.options.plotting.backend = "plotly"
 
 
-class SpecialQuadraticSpline:
-    ppoly: sp.interpolate.PPoly
-
+class SpecialQuadraticSpline(sp.interpolate.PPoly):
     def __init__(
         self,
         k: List[float],
@@ -38,7 +36,7 @@ class SpecialQuadraticSpline:
 
         x = np.linalg.solve(A, b)
 
-        self.ppoly = sp.interpolate.PPoly(c=x.reshape((n, 3)).T, x=k)
+        super().__init__(c=x.reshape((n, 3)).T, x=k)
 
 
 if __name__ == "__main__":
@@ -49,5 +47,5 @@ if __name__ == "__main__":
         boundary_condition="zero-curvature",
     )
     xs = np.linspace(k[0], k[-1], 1000)
-    ys = sqs.ppoly(xs)
+    ys = sqs(xs)
     pd.Series(ys, index=xs).plot().show()#.write_image("tmp.png")
