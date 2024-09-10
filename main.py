@@ -38,6 +38,9 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
 
         super().__init__(c=x.reshape((n, 3)).T, x=k)
 
+    def get_series(self, k: List[float]) -> List[float]:
+        return [self.integrate(a=k[i], b=k[i+1]) / (k[i+1] - k[i]) for i in range(len(k) - 1)]
+
 
 if __name__ == "__main__":
     k = np.array([0, 0.5, 2, 3, 4, 5, 6.5, 7, 8])
@@ -46,6 +49,7 @@ if __name__ == "__main__":
         y=np.array([np.nan, 3, 1, 4, 1, 5, 9, 2, 6]),
         boundary_condition="zero-curvature",
     )
+    sqs.to_time_series(k=[5, 6, 7, 8])
     xs = np.linspace(k[0], k[-1], 1000)
     ys = sqs(xs)
     pd.Series(ys, index=xs).plot().show()#.write_image("tmp.png")
