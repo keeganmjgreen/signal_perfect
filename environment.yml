@@ -1,0 +1,11 @@
+name: signal_perfect
+dependencies:
+  - python
+  - pip
+  - pip:
+      - mkdocs
+      - mkdocs-material
+      - numpy
+      - pandas
+      - plotly
+      - scipy
