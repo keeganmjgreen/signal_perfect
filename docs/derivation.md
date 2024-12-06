@@ -127,7 +127,7 @@ The average value of the quadratic spline over each interval in the time series 
 
 $$ F_i(t) = \int f_i(t) \ \mathrm{d}t = \frac{a_i}{3} t^3 + \frac{b_i}{2} t^2 + c_i t + C $$
 
-In the "zero-derivative boundary conditions" variant, the knots separate the intervals in the time series. Therefore, for all $i$ in $\{1,\dots,n\}$:
+The knots separate the intervals in the time series. Therefore, for all $i$ in $\{1,\dots,n\}$:
 
 $$
 \begin{aligned}
