@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Literal
 
 import numpy as np
@@ -23,7 +24,8 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
         y: list[float],
         boundary_condition: BoundaryCondition = "zero-curvature",
     ):
-        self.k = k
+        self.k = deepcopy(k)
+        k = SpecialQuadraticSpline._convert_knots(knots=k)
         self.y = y
         self.boundary_condition = boundary_condition
 
@@ -82,6 +84,12 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
         x = np.linalg.solve(A, b)
 
         super().__init__(c=x.reshape((n, 3)).T, x=k)
+
+    @staticmethod
+    def _convert_knots(knots: list[float]) -> list[float]:
+        if isinstance(pd.Index(knots), pd.DatetimeIndex):
+            knots = (pd.Index(knots).astype(int) / 1e3).to_list()
+        return knots
 
     @classmethod
     def from_regular_series(
@@ -160,6 +168,7 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
         return fig
 
     def get_series(self, k: list[float], plot: bool = False) -> list[float]:
+        k = SpecialQuadraticSpline._convert_knots(knots=k)
         series = [
             float(self.integrate(a=k[i], b=k[i + 1]) / (k[i + 1] - k[i]))
             for i in range(len(k) - 1)
