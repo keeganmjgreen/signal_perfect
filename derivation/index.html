@@ -14,7 +14,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.34">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.35">
     
     
       
@@ -294,7 +294,7 @@
           <li class="md-nav__item">
   <a href="#zero-slope-boundary-conditions-variant" class="md-nav__link">
     <span class="md-ellipsis">
-      "Zero-slope boundary conditions" variant
+      &ldquo;Zero-slope boundary conditions&rdquo; variant
     </span>
   </a>
   
@@ -303,7 +303,7 @@
           <li class="md-nav__item">
   <a href="#zero-curvature-boundary-conditions-variant" class="md-nav__link">
     <span class="md-ellipsis">
-      "Zero-curvature boundary conditions" variant
+      &ldquo;Zero-curvature boundary conditions&rdquo; variant
     </span>
   </a>
   
@@ -388,7 +388,7 @@
           <li class="md-nav__item">
   <a href="#zero-slope-boundary-conditions-variant" class="md-nav__link">
     <span class="md-ellipsis">
-      "Zero-slope boundary conditions" variant
+      &ldquo;Zero-slope boundary conditions&rdquo; variant
     </span>
   </a>
   
@@ -397,7 +397,7 @@
           <li class="md-nav__item">
   <a href="#zero-curvature-boundary-conditions-variant" class="md-nav__link">
     <span class="md-ellipsis">
-      "Zero-curvature boundary conditions" variant
+      &ldquo;Zero-curvature boundary conditions&rdquo; variant
     </span>
   </a>
   
@@ -424,7 +424,8 @@
 
 
 <h1 id="derivation">Derivation</h1>
-<p>The underlying signal is modeled by a quadratic spline. A spline is a piecewise polynomial. Each piece or segment of the spline is a polynomial and is separated by <span class="arithmatex">\(x\)</span>-values called knots. A spline is subject to constraints such at the knots, the <span class="arithmatex">\(y\)</span>-values of adjacent polynomial pieces are equal such that the pieces meet, and the derivatives of adjacent polynomial pieces are equal such that the spine is smooth and without kinks. The quadratic spline by which the underlying signal is modeled has an extra constraint such that its average value over each interval in the time series is equal to the value of that time series for that interval.</p>
+<p>Behind any time series data is an underlying signal which the data merely approximates. Continuing the solar example, this means that the underlying signal (the solar output) is merely approximated by recording its average in 15-minute blocks. In order to resample a signal (or rather, the data representing it), SignalPerfect models the true, underlying signal as best it can based on the available data&mdash;using a quadratic spline.</p>
+<p>A spline is a piecewise polynomial; each piece or segment of the spline is a polynomial and is separated by <span class="arithmatex">\(x\)</span>-values called knots. A spline is subject to constraints such that at the knots, the <span class="arithmatex">\(y\)</span>-values of adjacent polynomial pieces are equal so the pieces meet, and the derivatives of adjacent polynomial pieces are equal so the spline is smooth and without kinks. The quadratic spline by which the underlying signal is modeled has an extra constraint such that its average value over each interval in the time series is equal to the value of that time series for that interval. Hence, the SignalPerfect&rsquo;s <code>SpecialQuadraticSpline</code> class.</p>
 <p>For all <span class="arithmatex">\(i\)</span> in <span class="arithmatex">\(\{1,\dots,n\}\)</span>:</p>
 <div class="arithmatex">\[ f_i(t) = a_i t^2 + b_i t + c_i \]</div>
 <p>We have <span class="arithmatex">\(3n\)</span> unknowns, and thus need <span class="arithmatex">\(3n\)</span> equations.</p>
@@ -454,7 +455,7 @@ A_1 =
 \]</div>
 <pre><code class="language-python">A1 = np.array([[0, 0, 0] * (i-1) + [-k[i]**2, -k[i], -1, k[i]**2, k[i], 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
 </code></pre>
-<p>When using <code>numpy.PPoly</code>, however, each polynomial piece, regardless of what range on the <span class="arithmatex">\(x\)</span>-axis it spans in the piecewise function,  is expressed in terms of <span class="arithmatex">\(x\)</span> starting at zero. This is a way of "normalizing" each polynomial and avoiding sensitive coefficients. Thus, the <span class="arithmatex">\(k_i\)</span> for an <span class="arithmatex">\((a_i,b_i,c_i)\)</span> triple is replaced with zero and the <span class="arithmatex">\(k_i\)</span> for an <span class="arithmatex">\((a_{i+1},b_{i+1},c_{i+1})\)</span> triple is replaced with its distance from zero, <span class="arithmatex">\(k_i-k_{i-1}\)</span>, as follows:</p>
+<p>When using <code>numpy.PPoly</code>, however, each polynomial piece, regardless of what range on the <span class="arithmatex">\(x\)</span>-axis it spans in the piecewise function,  is expressed in terms of <span class="arithmatex">\(x\)</span> starting at zero. This is a way of &ldquo;normalizing&rdquo; each polynomial and avoiding sensitive coefficients. Thus, the <span class="arithmatex">\(k_i\)</span> for an <span class="arithmatex">\((a_i,b_i,c_i)\)</span> triple is replaced with zero and the <span class="arithmatex">\(k_i\)</span> for an <span class="arithmatex">\((a_{i+1},b_{i+1},c_{i+1})\)</span> triple is replaced with its distance from zero, <span class="arithmatex">\(k_i-k_{i-1}\)</span>, as follows:</p>
 <div class="arithmatex">\[
 A_1 =
 \begin{bmatrix}
@@ -507,9 +508,9 @@ A_2 =
 </code></pre>
 <p>Now we need <span class="arithmatex">\(n+2\)</span> more equations.</p>
 <h2 id="interval-average-constraint">Interval average constraint</h2>
-<p>The average value of the quadratic spline over each interval in the time series <span class="arithmatex">\(y[t]\)</span> must be equal to the value of that time series for that interval. The spline's average over an interval is expressed in terms of the definite integral of each quadratic piece divided by the width of the interval. The indefinite integral is:</p>
+<p>The average value of the quadratic spline over each interval in the time series <span class="arithmatex">\(y[t]\)</span> must be equal to the value of that time series for that interval. The spline&rsquo;s average over an interval is expressed in terms of the definite integral of each quadratic piece divided by the width of the interval. The indefinite integral is:</p>
 <div class="arithmatex">\[ F_i(t) = \int f_i(t) \ \mathrm{d}t = \frac{a_i}{3} t^3 + \frac{b_i}{2} t^2 + c_i t + C \]</div>
-<p>In the "zero-derivative boundary conditions" variant, the knots separate the intervals in the time series. Therefore, for all <span class="arithmatex">\(i\)</span> in <span class="arithmatex">\(\{1,\dots,n\}\)</span>:</p>
+<p>In the &ldquo;zero-derivative boundary conditions&rdquo; variant, the knots separate the intervals in the time series. Therefore, for all <span class="arithmatex">\(i\)</span> in <span class="arithmatex">\(\{1,\dots,n\}\)</span>:</p>
 <div class="arithmatex">\[
 \begin{aligned}
 &amp; \text{average over interval } i = \frac{1}{k_i - k_{i-1}} \int_{k_{i-1}}^{k_i} f_i(t) \ \mathrm{d}t = \frac{1}{k_i - k_{i-1}} (F_i(k_i) - F_i(k_{i-1})) = y[i] \\
@@ -557,8 +558,8 @@ A_3 =
 <p>(While it includes <span class="arithmatex">\(k_i\)</span> terms, the same substitution in <span class="arithmatex">\(\mathbf{b}_3\)</span> results in no change.)</p>
 <p>Now we need <span class="arithmatex">\(2\)</span> more equations, from two boundary conditions.</p>
 <h2 id="boundary-conditions">Boundary conditions</h2>
-<h3 id="zero-slope-boundary-conditions-variant">"Zero-slope boundary conditions" variant</h3>
-<p>In the "zero-slope boundary conditions" variant, the slope (first derivative) of the spline's endpoints are prescribed to be zero. Therefore,</p>
+<h3 id="zero-slope-boundary-conditions-variant">&ldquo;Zero-slope boundary conditions&rdquo; variant</h3>
+<p>In the &ldquo;zero-slope boundary conditions&rdquo; variant, the slope (first derivative) of the spline&rsquo;s endpoints are prescribed to be zero. Therefore,</p>
 <div class="arithmatex">\[ f_1'(k_0) = 0 \implies 2 a_1 k_0 + b_1 = 0 \]</div>
 <div class="arithmatex">\[ f_n'(k_n) = 0 \implies 2 a_n k_n + b_n = 0 \]</div>
 <p>This represents another <span class="arithmatex">\(2\)</span> linear equations, which can be expressed in the form <span class="arithmatex">\(A_4\mathbf{x}=\mathbf{b}_4\)</span>, where <span class="arithmatex">\(\mathbf{x}\)</span> is the same as before and:</p>
@@ -584,8 +585,8 @@ A_4 =
 \]</div>
 <pre><code class="language-python">A4 = np.array([[0, 1, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2 * (k[n] - k[n-1]), 1, 0]])
 </code></pre>
-<h3 id="zero-curvature-boundary-conditions-variant">"Zero-curvature boundary conditions" variant</h3>
-<p>In the "zero-curvature boundary conditions" variant, the curvature (second derivative) of the spline's endpoints are prescribed to be zero. Therefore,</p>
+<h3 id="zero-curvature-boundary-conditions-variant">&ldquo;Zero-curvature boundary conditions&rdquo; variant</h3>
+<p>In the &ldquo;zero-curvature boundary conditions&rdquo; variant, the curvature (second derivative) of the spline&rsquo;s endpoints are prescribed to be zero. Therefore,</p>
 <div class="arithmatex">\[ f_1''(k_0) = 0 \implies 2 a_1 = 0 \]</div>
 <div class="arithmatex">\[ f_n''(k_n) = 0 \implies 2 a_n = 0 \]</div>
 <p>This represents another <span class="arithmatex">\(2\)</span> linear equations, which can be expressed in the form <span class="arithmatex">\(A_4\mathbf{x}=\mathbf{b}_4\)</span>, where <span class="arithmatex">\(\mathbf{x}\)</span> is the same as before, <span class="arithmatex">\(\mathbf{b}_4\)</span> is the same as above, and:</p>
@@ -644,7 +645,7 @@ A_4 =
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.07f07601.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
