@@ -1,6 +1,7 @@
 site_name: SignalPerfect
 nav:
   - Home: index.md
+  - Demo: demo.md
   - Derivation: derivation.md
 theme:
   name: material
@@ -15,6 +16,7 @@ theme:
         name: Switch to light mode
 markdown_extensions:
   - smarty
+  - pymdownx.snippets
   - pymdownx.arithmatex:
       generic: true
 extra_javascript:
