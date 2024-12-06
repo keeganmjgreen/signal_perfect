@@ -7,13 +7,26 @@ import pandas as pd
 pd.options.plotting.backend = "plotly"
 
 
+BoundaryCondition = Literal["zero-slope", "zero-curvature"]
+
+
 class SpecialQuadraticSpline(sp.interpolate.PPoly):
+    k: list[float]
+    """Knots: x-values splitting up the signal into intervals/blocks."""
+    y: list[float]
+    """The average value of the signal over each interval."""
+    boundary_condition: BoundaryCondition
+
     def __init__(
         self,
         k: list[float],
         y: list[float],
-        boundary_condition: Literal["zero-slope", "zero-curvature"] = "zero-curvature",
+        boundary_condition: BoundaryCondition = "zero-curvature",
     ):
+        self.k = k
+        self.y = y
+        self.boundary_condition = boundary_condition
+
         n = len(k) - 1
 
         A1 = np.array([[0, 0, 0] * (i-1) + [-(k[i] - k[i-1])**2, -(k[i] - k[i-1]), -1, 0, 0, 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
