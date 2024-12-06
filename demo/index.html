@@ -9,21 +9,25 @@
       
       
       
+        <link rel="prev" href="..">
       
       
-      <link rel="icon" href="/assets/images/favicon.png">
+        <link rel="next" href="../derivation/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.35">
     
     
       
-        <title>SignalPerfect</title>
+        <title>Demo - SignalPerfect</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.35f28582.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.35f28582.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -42,7 +46,7 @@
       
     
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -67,6 +71,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#demo" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -79,7 +88,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="SignalPerfect" class="md-header__button md-logo" aria-label="SignalPerfect" data-md-component="logo">
+    <a href=".." title="SignalPerfect" class="md-header__button md-logo" aria-label="SignalPerfect" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -99,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Demo
             
           </span>
         </div>
@@ -200,7 +209,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="SignalPerfect" class="md-nav__button md-logo" aria-label="SignalPerfect" data-md-component="logo">
+    <a href=".." title="SignalPerfect" class="md-nav__button md-logo" aria-label="SignalPerfect" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -218,7 +227,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -235,10 +244,19 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/demo/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -247,6 +265,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -258,7 +277,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/derivation/" class="md-nav__link">
+      <a href="../derivation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -288,6 +307,8 @@
   
   
   
+    
+  
   
 </nav>
                   </div>
@@ -299,8 +320,36 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+<h1 id="demo">Demo</h1>
+<p>Consider the following signal that has been split up into intervals by <span class="arithmatex">\(x\)</span>-values called knots (<span class="arithmatex">\(k\)</span>). The average value (<span class="arithmatex">\(y\)</span>) of the signal is recorded over each interval:</p>
+<p>A special quadratic spline can be fit to these data as follows, by instantiating the <code>SpecialQuadraticSpline</code> class from the knots and <span class="arithmatex">\(y\)</span> values:</p>
+<pre><code class="language-python">&gt;&gt;&gt; sqs = SpecialQuadraticSpline(
+&gt;&gt;&gt;     k=np.array([0, 0.5, 2, 3, 4, 5, 6.5, 7, 8]),  # Knots: x-values splitting up the signal into intervals/blocks.
+&gt;&gt;&gt;     y=np.array([np.nan, 3, 1, 4, 1, 5, 9, 2, 6]),  # The average value of the signal over each interval.
+&gt;&gt;&gt;     boundary_condition=&quot;zero-curvature&quot;,
+&gt;&gt;&gt; )
+&gt;&gt;&gt; sqs.plot(include=[&quot;input-data-series&quot;, &quot;spline&quot;])
+</code></pre>
+<p>The special quadratic spline can be sampled using the <code>get_series</code> method:</p>
+<pre><code class="language-python">&gt;&gt;&gt; sqs.get_series(k=[5, 6, 7, 8], plot=True)
+[10.124367947293063, 4.3756320527069406, 6.0]
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -334,12 +383,12 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/", "features": [], "search": "/assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.56dfad97.min.js"></script>
+      <script src="../assets/javascripts/bundle.56dfad97.min.js"></script>
       
-        <script src="/javascripts/mathjax.js"></script>
+        <script src="../javascripts/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
