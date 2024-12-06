@@ -1,4 +1,4 @@
-﻿# Derivation
+# Derivation
 
 Behind any time series data is an underlying signal which the data merely approximates. Continuing the solar example, this means that the underlying signal (the solar output) is merely approximated by recording its average in 15-minute blocks. In order to resample a signal (or rather, the data representing it), SignalPerfect models the true, underlying signal as best it can based on the available data---using a quadratic spline.
 
@@ -37,7 +37,7 @@ $$
 A_1 =
 \begin{bmatrix}
     -k_1^2 & -k_1 & -1 & k_1^2 & k_1 & 1 & 0 & 0 & 0 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
-    0 & 0 & 0 & -k4^2 & -k_2 & -1 & k_2^2 & k_2 & 1 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & -k_2^2 & -k_2 & -1 & k_2^2 & k_2 & 1 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
     \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
     0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -k_n^2 & -k_n & -1 & k_n^2 & k_n & 1
 \end{bmatrix}
