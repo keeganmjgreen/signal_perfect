@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from main import SpecialQuadraticSpline
+from special_quadratic_spline import SpecialQuadraticSpline
 
 
 def test_special_quadratic_spline():
