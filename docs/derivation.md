@@ -47,7 +47,7 @@ $$
 A1 = np.array([[0, 0, 0] * (i-1) + [-k[i]**2, -k[i], -1, k[i]**2, k[i], 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
 ```
 
-When using `numpy.PPoly`, however, each polynomial piece, regardless of what range on the $x$-axis it spans in the piecewise function,  is expressed in terms of $x$ starting at zero. This is a way of "normalizing" each polynomial and avoiding sensitive coefficients. Thus, the $k_i$ for an $(a_i,b_i,c_i)$ triple is replaced with zero and the $k_i$ for an $(a_{i+1},b_{i+1},c_{i+1})$ triple is replaced with its distance from zero, $k_i-k_{i-1}$, as follows:
+When using `numpy.PPoly`, however, each polynomial piece, regardless of what range on the $x$-axis it spans in the piecewise function,  is expressed in terms of $x$ starting at zero. This is a way of "normalizing" each polynomial and avoiding sensitive coefficients. Thus, the $k_i$ for an $(a_{i+1},b_{i+1},c_{i+1})$ triple is replaced with zero and the $k_i$ for an $(a_i,b_i,c_i)$ triple is replaced with its distance from zero, $k_i-k_{i-1}$, as follows:
 
 $$
 A_1 =
@@ -103,7 +103,7 @@ $$
 A2 = np.array([[0, 0, 0] * (i-1) + [-2 * k[i], -1, 0, 2 * k[i], 1, 0] + [0, 0, 0] * (n-i-1)  for i in range(1, n)])
 ```
 
-Again, replacing the $k_i$ for each $(a_i,b_i,c_i)$ triple with zero, and replacing the $k_i$ for each $(a_{i+1},b_{i+1},c_{i+1})$ triple with $k_i-k_{i-1}$, yields:
+Again, replacing the $k_i$ for each $(a_i,b_i,c_i)$ triple with zero, and replacing the $k_i$ for each $(a_{i-1},b_{i-1},c_{i-1})$ triple with $k_i-k_{i-1}$, yields:
 
 $$
 A_2 =
