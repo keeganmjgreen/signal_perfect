@@ -5,6 +5,7 @@ nav:
 theme:
   name: material
 markdown_extensions:
+  - smarty
   - pymdownx.arithmatex:
       generic: true
 extra_javascript:
