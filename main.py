@@ -1,4 +1,4 @@
-from typing import List, Literal
+from typing import Literal
 
 import numpy as np
 import scipy as sp
@@ -10,8 +10,8 @@ pd.options.plotting.backend = "plotly"
 class SpecialQuadraticSpline(sp.interpolate.PPoly):
     def __init__(
         self,
-        k: List[float],
-        y: List[float],
+        k: list[float],
+        y: list[float],
         boundary_condition: Literal["zero-slope", "zero-curvature"] = "zero-curvature",
     ):
         n = len(k) - 1
@@ -38,7 +38,7 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
 
         super().__init__(c=x.reshape((n, 3)).T, x=k)
 
-    def get_series(self, k: List[float]) -> List[float]:
+    def get_series(self, k: list[float]) -> list[float]:
         return [self.integrate(a=k[i], b=k[i+1]) / (k[i+1] - k[i]) for i in range(len(k) - 1)]
 
 
