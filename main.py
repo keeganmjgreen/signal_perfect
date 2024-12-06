@@ -163,13 +163,3 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
                 )
             fig.show()
         return series
-
-
-if __name__ == "__main__":
-    k = np.array([0, 0.5, 2, 3, 4, 5, 6.5, 7, 8])
-    sqs = SpecialQuadraticSpline(
-        k=k,
-        y=np.array([3, 1, 4, 1, 5, 9, 2, 6]),
-        boundary_condition="zero-curvature",
-    )
-    sqs.get_series(k=[5, 6, 7, 8], plot=True)

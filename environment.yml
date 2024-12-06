@@ -8,4 +8,5 @@ dependencies:
       - numpy
       - pandas
       - plotly
+      - pytest==7.4.4
       - scipy
