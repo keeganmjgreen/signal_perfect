@@ -48,17 +48,17 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
 
         A3 = np.array(
             [
-                [0, 0, 0] * (i - 1)
+                [0, 0, 0] * i
                 + [
-                    2 * (k[i] - k[i - 1]) ** 3,
-                    3 * (k[i] - k[i - 1]) ** 2,
-                    6 * (k[i] - k[i - 1]),
+                    2 * (k[i + 1] - k[i]) ** 3,
+                    3 * (k[i + 1] - k[i]) ** 2,
+                    6 * (k[i + 1] - k[i]),
                 ]
-                + [0, 0, 0] * (n - i)
-                for i in range(1, n + 1)
+                + [0, 0, 0] * (n - i - 1)
+                for i in range(0, n)
             ]
         )
-        b3 = np.array([[6 * y[i] * (k[i] - k[i - 1])] for i in range(1, n + 1)])
+        b3 = np.array([[6 * y[j] * (k[j + 1] - k[j])] for j in range(0, n)])
 
         if boundary_condition == "zero-slope":
             A4 = np.array(
@@ -109,7 +109,7 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
             # Plot input data series:
             fig.add_scatter(
                 x=self.k,
-                y=[*self.y[1:], self.y[-1]],
+                y=[*self.y, self.y[-1]],
                 line_shape="hv",
                 mode="lines",
                 line_color="#42A5F5",
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     k = np.array([0, 0.5, 2, 3, 4, 5, 6.5, 7, 8])
     sqs = SpecialQuadraticSpline(
         k=k,
-        y=np.array([np.nan, 3, 1, 4, 1, 5, 9, 2, 6]),
+        y=np.array([3, 1, 4, 1, 5, 9, 2, 6]),
         boundary_condition="zero-curvature",
     )
     sqs.get_series(k=[5, 6, 7, 8], plot=True)

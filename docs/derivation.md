@@ -1,10 +1,10 @@
-# Derivation
+﻿# Derivation
 
 Behind any time series data is an underlying signal which the data merely approximates. Continuing the solar example, this means that the underlying signal (the solar output) is merely approximated by recording its average in 15-minute blocks. In order to resample a signal (or rather, the data representing it), SignalPerfect models the true, underlying signal as best it can based on the available data---using a quadratic spline.
 
-A spline is a piecewise polynomial; each piece or segment of the spline is a polynomial and is separated by $x$-values called knots. A spline is subject to constraints such that at the knots, the $y$-values of adjacent polynomial pieces are equal so the pieces meet, and the derivatives of adjacent polynomial pieces are equal so the spline is smooth and without kinks. The quadratic spline by which the underlying signal is modeled has an extra constraint such that its average value over each interval in the time series is equal to the value of that time series for that interval. Hence, the SignalPerfect's `SpecialQuadraticSpline` class.
+A spline is a piecewise polynomial; each piece or segment of the spline is a polynomial and is separated by $t$-values called knots. A spline is subject to constraints such that at the knots, the $y$-values of adjacent polynomial pieces are equal so the pieces meet, and the derivatives of adjacent polynomial pieces are equal so the spline is smooth and without kinks. The quadratic spline by which the underlying signal is modeled has an extra constraint such that its average value over each interval in the time series is equal to the value of that time series for that interval. Hence, the SignalPerfect's `SpecialQuadraticSpline` class.
 
-For all $i$ in $\{1,\dots,n\}$:
+For all $i$ in $\{0,\dots,n-1\}$:
 
 $$ f_i(t) = a_i t^2 + b_i t + c_i $$
 
@@ -16,15 +16,15 @@ The $y$-values of adjacent quadratic pieces must be equal to each other at each 
 
 $$
 \begin{aligned}
-& f_i(k_i)=f_{i+1}(k_i) \\
-& \implies a_i k_i^2 + b_i k_i + c_i = a_{i+1} k_i^2 + b_{i+1} k_i + c_{i+1} \\
-& \implies (-k_i^2) a_i + (-k_i) b_i + (-1) c_i + (k_i^2) a_{i+1} + (k_i) b_{i+1} + (1) c_{i+1} = 0
+& f_{i-1}(k_i)=f_i(k_i) \\
+& \implies a_{i-1} k_i^2 + b_{i-1} k_i + c_{i-1} = a_i k_i^2 + b_i k_i + c_i \\
+& \implies (-k_i^2) a_{i-1} + (-k_i) b_{i-1} + (-1) c_{i-1} + (k_i^2) a_i + (k_i) b_i + (1) c_i = 0
 \end{aligned}
 $$
 
 This represents a set of $n-1$ linear equations, which can be expressed in the form $A_1\mathbf{x}=\mathbf{b}_1$, where:
 
-$$ \mathbf{x} = \begin{bmatrix} a_1 & b_1 & c_1 & \cdots & a_n & b_n & c_n \end{bmatrix}^\mathrm{T} $$
+$$ \mathbf{x} = \begin{bmatrix} a_0 & b_0 & c_0 & \cdots & a_{n-1} & b_{n-1} & c_{n-1} \end{bmatrix}^\mathrm{T} $$
 
 $$ \mathbf{b}_1 = \begin{bmatrix} 0 & \dots & 0 \end{bmatrix}^\mathrm{T} $$
 
@@ -47,7 +47,7 @@ $$
 A1 = np.array([[0, 0, 0] * (i-1) + [-k[i]**2, -k[i], -1, k[i]**2, k[i], 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
 ```
 
-When using `numpy.PPoly`, however, each polynomial piece, regardless of what range on the $x$-axis it spans in the piecewise function,  is expressed in terms of $x$ starting at zero. This is a way of "normalizing" each polynomial and avoiding sensitive coefficients. Thus, the $k_i$ for an $(a_{i+1},b_{i+1},c_{i+1})$ triple is replaced with zero and the $k_i$ for an $(a_i,b_i,c_i)$ triple is replaced with its distance from zero, $k_i-k_{i-1}$, as follows:
+When using `numpy.PPoly`, however, each polynomial piece, regardless of what range on the $x$-axis it spans in the piecewise function,  is expressed in terms of $x$ starting at zero. This is a way of "normalizing" each polynomial and avoiding sensitive coefficients. Thus, the $k_i$ for an $(a_i,b_i,c_i)$ triple is replaced with zero and the $k_i$ for an $(a_{i-1},b_{i-1},c_{i-1})$ triple is replaced with its distance from zero, $k_i-k_{i-1}$, as follows:
 
 $$
 A_1 =
@@ -75,9 +75,9 @@ Therefore, for all $i$ in $\{1,\dots,n-1\}$:
 
 $$
 \begin{aligned}
-& f_i'(k_i)=f_{i+1}'(k_i) \\
-& \implies 2 a_i k_i + b_i = 2 a_{i+1} k_i + b_{i+1} \\
-& \implies (-2 k_i) a_i + (-1) b_i + (2 k_i) a_{i+1} + (1) b_{i+1} = 0
+& f_{i-1}'(k_i)=f_i'(k_i) \\
+& \implies 2 a_{i-1} k_i + b_{i-1} = 2 a_i k_i + b_i \\
+& \implies (-2 k_i) a_{i-1} + (-1) b_{i-1} + (2 k_i) a_i + (1) b_i = 0
 \end{aligned}
 $$
 
@@ -127,15 +127,15 @@ The average value of the quadratic spline over each interval in the time series 
 
 $$ F_i(t) = \int f_i(t) \ \mathrm{d}t = \frac{a_i}{3} t^3 + \frac{b_i}{2} t^2 + c_i t + C $$
 
-The knots separate the intervals in the time series. Therefore, for all $i$ in $\{1,\dots,n\}$:
+The knots separate the intervals in the time series. Therefore, for all $i$ in $\{0,\dots,n-1\}$:
 
 $$
 \begin{aligned}
-& \text{average over interval } i = \frac{1}{k_i - k_{i-1}} \int_{k_{i-1}}^{k_i} f_i(t) \ \mathrm{d}t = \frac{1}{k_i - k_{i-1}} (F_i(k_i) - F_i(k_{i-1})) = y[i] \\
-& \implies F_i(k_i) - F_i(k_{i-1}) = (k_i - k_{i-1}) \ y[i] \\
-& \implies \left( \frac{a_i}{3} k_i^3 + \frac{b_i}{2} k_i^2 + c_i k_i + C \right) - \left( \frac{a_i}{3} k_{i-1}^3 + \frac{b_i}{2} k_{i-1}^2 + c_i k_{i-1} + C \right) = (k_i - k_{i-1}) \ y[i] \\
-& \implies 2 a_i k_i^3 + 3 b_i k_i^2 + 6 c_i k_i - 2 a_i k_{i-1}^3 - 3 b_i k_{i-1}^2 - 6 c_i k_{i-1} = 6 (k_i - k_{i-1}) \ y[i] \\
-& \implies 2 (k_i^3 - k_{i-1}^3) a_i + 3 (k_i^2 - k_{i-1}^2) b_i + 6 (k_i - k_{i-1}) c_i = 6 (k_i - k_{i-1}) \ y[i]
+& \text{average over interval } i = \frac{1}{k_{i+1} - k_i} \int_{k_i}^{k_{i+1}} f_i(t) \ \mathrm{d}t = \frac{1}{k_{i+1} - k_i} (F_i(k_{i+1}) - F_i(k_i)) = y[i] \\
+& \implies F_i(k_{i+1}) - F_i(k_i) = (k_{i+1} - k_i) \ y[i] \\
+& \implies \left( \frac{a_{i+1}}{3} k_{i+1}^3 + \frac{b_{i+1}}{2} k_{i+1}^2 + c_{i+1} k_{i+1} + C \right) - \left( \frac{a_{i+1}}{3} k_i^3 + \frac{b_{i+1}}{2} k_i^2 + c_{i+1} k_i + C \right) = (k_{i+1} - k_i) \ y[i] \\
+& \implies 2 a_{i+1} k_{i+1}^3 + 3 b_{i+1} k_{i+1}^2 + 6 c_{i+1} k_{i+1} - 2 a_{i+1} k_i^3 - 3 b_{i+1} k_i^2 - 6 c_{i+1} k_i = 6 (k_{i+1} - k_i) \ y[i] \\
+& \implies 2 (k_{i+1}^3 - k_i^3) a_{i+1} + 3 (k_{i+1}^2 - k_i^2) b_{i+1} + 6 (k_{i+1} - k_i) c_{i+1} = 6 (k_{i+1} - k_i) \ y[i]
 \end{aligned}
 $$
 
@@ -144,15 +144,15 @@ This represents another $n$ linear equations, which can be expressed in the form
 $$
 \mathbf{b}_3 =
 \begin{bmatrix}
-    6 (k_1 - k_0) \ y[1] \\
-    6 (k_2 - k_1) \ y[2] \\
+    6 (k_1 - k_0) \ y[0] \\
+    6 (k_2 - k_1) \ y[1] \\
     \dots \\
-    6 (k_n - k_{n-1}) \ y[n]
+    6 (k_n - k_{n-1}) \ y[n-1]
 \end{bmatrix}
 $$
 
 ```python
-b3 = np.array([[6 * y[i] * (k[i] - k[i-1])] for i in range(1, n+1)])
+b3 = np.array([[6 * y[i] * (k[i+1] - k[i])] for i in range(0, n)])
 ```
 
 $$
@@ -169,7 +169,7 @@ $$
 A3 = np.array([[0, 0, 0] * (i-1) + [2 * (k[i]**3 - k[i-1]**3), 3 * (k[i]**2 - k[i-1]**2), 6 * (k[i] - k[i-1])] + [0, 0, 0] * (n-i) for i in range(1, n+1)])
 ```
 
-Replacing the $k_i$ and $k_{i+1}$ for each $(a_i,b_i,c_i)$ triple with zero and $k_i-k_{i-1}$ respectively yields:
+Replacing the $k_i$ and $k_{i+1}$ for each $(a_i,b_i,c_i)$ triple with zero and $k_{i+1}-k_i$ respectively yields:
 
 $$
 A_3 =
@@ -195,9 +195,9 @@ Now we need $2$ more equations, from two boundary conditions.
 
 In the "zero-slope boundary conditions" variant, the slope (first derivative) of the spline's endpoints are prescribed to be zero. Therefore,
 
-$$ f_1'(k_0) = 0 \implies 2 a_1 k_0 + b_1 = 0 $$
+$$ f_0'(k_0) = 0 \implies 2 a_0 k_0 + b_0 = 0 $$
 
-$$ f_n'(k_n) = 0 \implies 2 a_n k_n + b_n = 0 $$
+$$ f_{n-1}'(k_n) = 0 \implies 2 a_{n-1} k_n + b_{n-1} = 0 $$
 
 This represents another $2$ linear equations, which can be expressed in the form $A_4\mathbf{x}=\mathbf{b}_4$, where $\mathbf{x}$ is the same as before and:
 
@@ -237,9 +237,9 @@ A4 = np.array([[0, 1, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2 * (k[n] - k
 
 In the "zero-curvature boundary conditions" variant, the curvature (second derivative) of the spline's endpoints are prescribed to be zero. Therefore,
 
-$$ f_1''(k_0) = 0 \implies 2 a_1 = 0 $$
+$$ f_0''(k_0) = 0 \implies 2 a_0 = 0 $$
 
-$$ f_n''(k_n) = 0 \implies 2 a_n = 0 $$
+$$ f_{n-1}''(k_n) = 0 \implies 2 a_{n-1} = 0 $$
 
 This represents another $2$ linear equations, which can be expressed in the form $A_4\mathbf{x}=\mathbf{b}_4$, where $\mathbf{x}$ is the same as before, $\mathbf{b}_4$ is the same as above, and:
 
