@@ -39,7 +39,7 @@ A_1 =
     -k_1^2 & -k_1 & -1 & k_1^2 & k_1 & 1 & 0 & 0 & 0 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
     0 & 0 & 0 & -k_2^2 & -k_2 & -1 & k_2^2 & k_2 & 1 & \cdots & 0 & 0 & 0 & 0 & 0 & 0 \\
     \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -k_n^2 & -k_n & -1 & k_n^2 & k_n & 1
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -k_{n-1}^2 & -k_{n-1} & -1 & k_{n-1}^2 & k_{n-1} & 1
 \end{bmatrix}
 $$
 
