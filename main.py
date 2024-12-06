@@ -89,20 +89,22 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
         regular_series: pd.Series,
         boundary_condition: BoundaryCondition = "zero-curvature",
     ) -> SpecialQuadraticSpline:
-        if isinstance(regular_series.index, pd.RangeIndex):
-            delta = regular_series.index.step
-        elif isinstance(regular_series.index, pd.DatetimeIndex):
-            delta = regular_series.index.freq.delta
-        else:
-            raise NotImplementedError
+
         return cls(
-            k=[
-                *regular_series.index,
-                regular_series.index[-1] + delta,
-            ],
+            k=SpecialQuadraticSpline._index_to_knots(regular_series.index),
             y=regular_series.to_list(),
             boundary_condition=boundary_condition,
         )
+
+    @staticmethod
+    def _index_to_knots(index: pd.Index) -> list[float]:
+        if isinstance(index, pd.RangeIndex):
+            delta = index.step
+        elif isinstance(index, pd.DatetimeIndex):
+            delta = index.freq.delta
+        else:
+            raise NotImplementedError
+        return [*index, index[-1] + delta]
 
     def plot(
         self,
@@ -187,3 +189,9 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
                 )
             fig.show()
         return series
+
+    def get_regular_series(self, index: pd.Index, plot: bool = False) -> pd.Series:
+        return pd.Series(
+            self.get_series(k=SpecialQuadraticSpline._index_to_knots(index), plot=plot),
+            index=index,
+        )
