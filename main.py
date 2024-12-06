@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from typing import Literal
 
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 import scipy as sp
 
@@ -79,6 +82,27 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
         x = np.linalg.solve(A, b)
 
         super().__init__(c=x.reshape((n, 3)).T, x=k)
+
+    @classmethod
+    def from_regular_series(
+        cls,
+        regular_series: pd.Series,
+        boundary_condition: BoundaryCondition = "zero-curvature",
+    ) -> SpecialQuadraticSpline:
+        if isinstance(regular_series.index, pd.RangeIndex):
+            delta = regular_series.index.step
+        elif isinstance(regular_series.index, pd.DatetimeIndex):
+            delta = regular_series.index.freq.delta
+        else:
+            raise NotImplementedError
+        return cls(
+            k=[
+                *regular_series.index,
+                regular_series.index[-1] + delta,
+            ],
+            y=regular_series.to_list(),
+            boundary_condition=boundary_condition,
+        )
 
     def plot(
         self,
