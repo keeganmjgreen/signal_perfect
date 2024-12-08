@@ -109,7 +109,7 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
         if isinstance(index, pd.RangeIndex):
             delta = index.step
         elif isinstance(index, pd.DatetimeIndex):
-            delta = index.freq.delta
+            delta = pd.Timedelta(index.freq)
         else:
             raise NotImplementedError
         return [*index, index[-1] + delta]
