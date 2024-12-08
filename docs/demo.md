@@ -17,7 +17,9 @@ A special quadratic spline can be fit to these data as follows, by instantiating
 
 --8<-- "docs/demo/input,spline.html"
 
-The special quadratic spline can be sampled using the `get_series` method:
+Note that this is quite different to something like a polynomial fit or cubic smoothing spline, putting the "special" in "special quadratic spline". This spline is not fit through any data points, because we do not have any instantaneous data points of the original signal --- only its average values over certain intervals of time. The spline's average over each of these intervals is constrained to be equal to the signal's average over each of these intervals.
+
+Now, the special quadratic spline can be sampled using the `get_series` method:
 
 ```python
 >>> sqs.get_series(k=[5, 6, 7, 8], plot=True)

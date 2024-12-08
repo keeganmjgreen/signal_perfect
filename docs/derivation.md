@@ -1,6 +1,6 @@
 ﻿# Derivation
 
-Behind any time series data is an underlying signal which the data merely approximates. Continuing the solar example, this means that the underlying signal (the solar output) is merely approximated by recording its average in 15-minute blocks. In order to resample a signal (or rather, the data representing it), SignalPerfect models the true, underlying signal as best it can based on the available data---using a quadratic spline.
+Behind any time series data is an underlying signal which the data merely approximates. Continuing the solar example, this means that the underlying signal (the solar output) is merely approximated by recording its average in 15-minute blocks. In order to resample a signal (or rather, the data representing it), SignalPerfect models the true, underlying signal as best it can based on the available data --- using a quadratic spline.
 
 A spline is a piecewise polynomial; each piece or segment of the spline is a polynomial and is separated by $t$-values called knots. A spline is subject to constraints such that at the knots, the $y$-values of adjacent polynomial pieces are equal so the pieces meet, and the derivatives of adjacent polynomial pieces are equal so the spline is smooth and without kinks. The quadratic spline by which the underlying signal is modeled has an extra constraint such that its average value over each interval in the time series is equal to the value of that time series for that interval. Hence, the SignalPerfect's `SpecialQuadraticSpline` class.
 
