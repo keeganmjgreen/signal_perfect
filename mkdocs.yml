@@ -3,6 +3,7 @@ nav:
   - Home: index.md
   - Demo: demo.md
   - Derivation: derivation.md
+  - Performance: performance.md
 theme:
   name: material
   palette:
