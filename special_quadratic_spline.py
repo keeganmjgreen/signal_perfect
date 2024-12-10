@@ -34,38 +34,37 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
 
         n = len(k) - 1
 
-        A1 = np.array(
-            [
-                [0, 0, 0] * (i - 1)
-                + [-((k[i] - k[i - 1]) ** 2), -(k[i] - k[i - 1]), -1, 0, 0, 1]
-                + [0, 0, 0] * (n - i - 1)
-                for i in range(1, n)
+        A1 = np.zeros((n - 1, 3 * n))
+        for i in range(1, n):
+            A1[i - 1, 3 * (i - 1) : 3 * (i - 1) + 6] = [
+                -((k[i] - k[i - 1]) ** 2),
+                -(k[i] - k[i - 1]),
+                -1,
+                0,
+                0,
+                1,
             ]
-        )
         b1 = np.zeros((n - 1, 1))
 
-        A2 = np.array(
-            [
-                [0, 0, 0] * (i - 1)
-                + [-2 * (k[i] - k[i - 1]), -1, 0, 0, 1, 0]
-                + [0, 0, 0] * (n - i - 1)
-                for i in range(1, n)
+        A2 = np.zeros((n - 1, 3 * n))
+        for i in range(1, n):
+            A2[i - 1, 3 * (i - 1) : 3 * (i - 1) + 6] = [
+                -2 * (k[i] - k[i - 1]),
+                -1,
+                0,
+                0,
+                1,
+                0,
             ]
-        )
         b2 = np.zeros((n - 1, 1))
 
-        A3 = np.array(
-            [
-                [0, 0, 0] * i
-                + [
-                    2 * (k[i + 1] - k[i]) ** 3,
-                    3 * (k[i + 1] - k[i]) ** 2,
-                    6 * (k[i + 1] - k[i]),
-                ]
-                + [0, 0, 0] * (n - i - 1)
-                for i in range(0, n)
+        A3 = np.zeros((n, 3 * n))
+        for i in range(0, n):
+            A3[i, 3 * i : 3 * i + 3] = [
+                2 * (k[i + 1] - k[i]) ** 3,
+                3 * (k[i + 1] - k[i]) ** 2,
+                6 * (k[i + 1] - k[i]),
             ]
-        )
         b3 = np.array([[6 * y[j] * (k[j + 1] - k[j])] for j in range(0, n)])
 
         if boundary_condition == "zero-slope":
