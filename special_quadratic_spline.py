@@ -84,22 +84,23 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
         A = np.concat([A1, A2, A3, A4])
         b = np.concat([b1, b2, b3, b4])
 
-        graph = scipy.sparse.csr_array(A)
-        permutation = scipy.sparse.csgraph.reverse_cuthill_mckee(graph)
+        # graph = scipy.sparse.csr_array(A)
+        # permutation = scipy.sparse.csgraph.reverse_cuthill_mckee(graph)
 
-        graph = graph[permutation, :][:, permutation]
+        # graph = graph[permutation, :][:, permutation]
         # ^ TODO: More efficient after `.toarray()`?
-        A = graph.toarray()
-        b = b[permutation]
+        # A = graph.toarray()
+        # b = b[permutation]
 
         # x = np.linalg.solve(A, b)
         n_below, n_above = scipy.linalg.bandwidth(A)
         ab = SpecialQuadraticSpline._to_banded(n_above, n_below, a=A)
-        n_below, _ = scipy.linalg.bandwidth(ab[::-1])  # TODO: Check.
-        l = u = ab.shape[0] - n_below - 1  # TODO: Check.
+        n_below, n_above = scipy.linalg.bandwidth(ab[::-1])  # TODO: Check.
+        l = ab.shape[0] - n_below - 1  # TODO: Check.
+        u = ab.shape[1] - n_above - 1  # TODO: Check.
         x = scipy.linalg.solve_banded(l_and_u=(l, u), ab=ab, b=b)
 
-        x = x[pd.Series(permutation).sort_values().index]
+        # x = x[pd.Series(permutation).sort_values().index]
 
         super().__init__(c=x.reshape((n, 3)).T, x=k)
 
