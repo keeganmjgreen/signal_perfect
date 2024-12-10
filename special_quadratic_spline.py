@@ -81,9 +81,38 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
         A = np.concat([A1, A2, A3, A4])
         b = np.concat([b1, b2, b3, b4])
 
+        df = pd.concat(
+            [
+                pd.DataFrame(
+                    A,
+                    columns=pd.MultiIndex.from_tuples([("A", c) for c in range(3 * n)]),
+                ),
+                pd.Series(b.T[0], name=("b", 0)),
+            ],
+            axis="columns",
+        )
+
         x = np.linalg.solve(A, b)
 
         super().__init__(c=x.reshape((n, 3)).T, x=k)
+
+    def _to_banded(n_below: int, n_above: int, a: np.ndarray) -> np.ndarray:
+        """Convert a square, banded matrix `a` to diagonal ordered form (consumable by
+        `np.linalg.solve_banded`).
+
+        Function copied from the following recent SciPy PR, until it is released.
+        https://github.com/scipy/scipy/pull/21726/files.
+        """
+
+        n = a.shape[0]
+        rows = n_above + n_below + 1
+        ab = np.zeros((rows, n), dtype=a.dtype)
+        ab[n_above] = np.diag(a)
+        for i in range(1, n_above + 1):
+            ab[n_above - i, i:] = np.diag(a, i)
+        for i in range(1, n_below + 1):
+            ab[n_above + i, :-i] = np.diag(a, -i)
+        return ab
 
     @staticmethod
     def _convert_knots(knots: list[float]) -> list[float]:

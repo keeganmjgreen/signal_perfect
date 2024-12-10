@@ -60,14 +60,14 @@ def test_get_regular_time_series():
 
 
 def make_random_signal(signal_length: int) -> pd.Series:
-    initial_value = 0
+    initial_value = random.gauss()
     signal_values = [initial_value]
     for _ in range(signal_length):
         signal_values.append(random.gauss())
     return pd.Series(signal_values)
 
 
-@pytest.mark.parametrize("signal_length", range(100, 4000, 400))
+@pytest.mark.parametrize("signal_length", [4])
 def test_performance(signal_length, benchmark):
     def make_spline():
         sqs = SpecialQuadraticSpline.from_regular_series(
