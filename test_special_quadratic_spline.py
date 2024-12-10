@@ -14,7 +14,7 @@ def test_special_quadratic_spline():
         boundary_condition="zero-curvature",
     )
     series = sqs.get_series(k=[5, 6, 7, 8])
-    assert series == [10.124367947293063, 4.3756320527069406, 6.0]
+    np.testing.assert_array_almost_equal(series, [10.124367, 4.375632, 6.0])
 
 
 def test_from_regular_series():
@@ -22,7 +22,7 @@ def test_from_regular_series():
         pd.Series([3, 1, 4, 1, 5, 9, 2, 6])
     )
     series = sqs.get_series(k=[5, 6, 7, 8])
-    assert np.isclose(series, [9.0, 2.0, 6.0]).all()
+    np.testing.assert_array_almost_equal(series, [9.0, 2.0, 6.0])
 
 
 def test_from_regular_time_series():
@@ -32,7 +32,7 @@ def test_from_regular_time_series():
         )
     )
     series = sqs.get_series(k=pd.date_range("2000-01-06 00:00", periods=4).to_list())
-    assert np.isclose(series, [9.0, 2.0, 6.0]).all()
+    np.testing.assert_array_almost_equal(series, [9.0, 2.0, 6.0])
 
 
 def test_get_regular_series():
