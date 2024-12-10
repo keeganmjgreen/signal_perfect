@@ -6,12 +6,15 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-import scipy as sp
+import scipy
+import scipy.linalg
+import scipy.sparse
+import scipy.sparse.csgraph
 
 BoundaryCondition = Literal["zero-slope", "zero-curvature"]
 
 
-class SpecialQuadraticSpline(sp.interpolate.PPoly):
+class SpecialQuadraticSpline(scipy.interpolate.PPoly):
     k: list[float]
     """Knots: x-values splitting up the signal into intervals/blocks."""
     y: list[float]
@@ -81,21 +84,26 @@ class SpecialQuadraticSpline(sp.interpolate.PPoly):
         A = np.concat([A1, A2, A3, A4])
         b = np.concat([b1, b2, b3, b4])
 
-        df = pd.concat(
-            [
-                pd.DataFrame(
-                    A,
-                    columns=pd.MultiIndex.from_tuples([("A", c) for c in range(3 * n)]),
-                ),
-                pd.Series(b.T[0], name=("b", 0)),
-            ],
-            axis="columns",
-        )
+        graph = scipy.sparse.csr_array(A)
+        permutation = scipy.sparse.csgraph.reverse_cuthill_mckee(graph)
 
-        x = np.linalg.solve(A, b)
+        graph = graph[permutation, :][:, permutation]
+        # ^ TODO: More efficient after `.toarray()`?
+        A = graph.toarray()
+        b = b[permutation]
+
+        # x = np.linalg.solve(A, b)
+        n_below, n_above = scipy.linalg.bandwidth(A)
+        ab = SpecialQuadraticSpline._to_banded(n_above, n_below, a=A)
+        n_below, _ = scipy.linalg.bandwidth(ab[::-1])  # TODO: Check.
+        l = u = ab.shape[0] - n_below - 1  # TODO: Check.
+        x = scipy.linalg.solve_banded(l_and_u=(l, u), ab=ab, b=b)
+
+        x = x[pd.Series(permutation).sort_values().index]
 
         super().__init__(c=x.reshape((n, 3)).T, x=k)
 
+    @staticmethod
     def _to_banded(n_below: int, n_above: int, a: np.ndarray) -> np.ndarray:
         """Convert a square, banded matrix `a` to diagonal ordered form (consumable by
         `np.linalg.solve_banded`).
