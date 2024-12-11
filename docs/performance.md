@@ -1,6 +1,10 @@
 # It may be *Per$\!\!\:f\!\!\:$ec$[t]$*, but is it *Per$\!\!\:f\!\!\:$orman$[t]$*?
 
-Yes; SignalPerfect is incredibly fast.
+Yes. SignalPerfect is incredibly fast:
+
+--8<-- "docs/performance/benchmark.html"
+
+To put this in perspective, consider two year's worth of a 24/7 time series with 1-minute resolution. SignalPerfect can fit a special quadratic spline to these ~1M data points in a mere 2.5 seconds, even though this requires solving an enormous linear system with ~3M unknowns (the spline's parameters).
 
 The instantiation of the `SpecialQuadraticSpline` class --- the creation of the special quadratic spline itself --- is the most computationally expensive code, compared to the methods of the class. Where $n$ is `len(k)` or `len(y) + 1`, `SpecialQuadraticSpline(k, y)` has a computational complexity of $O(n)$ rather than $O(n^3)$, thanks to the following linear algebra strategies with which `SpecialQuadraticSpline`'s constructor is implemented.
 
