@@ -35,6 +35,7 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
         n = len(k) - 1
 
         A = np.zeros((3 * n, 3 * n))
+        b = np.zeros(3 * n)
 
         for i in range(1, n):
             A[2 + 3 * (i - 1), 3 * (i - 1) : 3 * (i - 1) + 6] = [
@@ -45,7 +46,6 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
                 0,
                 1,
             ]
-        b1 = np.zeros((n - 1, 1))
 
         for i in range(1, n):
             A[3 + 3 * (i - 1), 3 * (i - 1) : 3 * (i - 1) + 6] = [
@@ -56,7 +56,6 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
                 1,
                 0,
             ]
-        b2 = np.zeros((n - 1, 1))
 
         for i in range(0, n):
             A[1 + 3 * i, 3 * i : 3 * i + 3] = [
@@ -64,29 +63,14 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
                 3 * (k[i + 1] - k[i]) ** 2,
                 6 * (k[i + 1] - k[i]),
             ]
-        b3 = np.array([[6 * y[j] * (k[j + 1] - k[j])] for j in range(0, n)])
+            b[1 + 3 * i] = 6 * y[i] * (k[i + 1] - k[i])
 
         if boundary_condition == "zero-slope":
-            A4 = np.array(
-                [
-                    [0, 1, 0] + [0, 0, 0] * (n - 1),
-                    [0, 0, 0] * (n - 1) + [2 * (k[n] - k[n - 1]), 1, 0],
-                ]
-            )
+            A[0, :3] = [0, 1, 0]
+            A[-1, -3:] = [2 * (k[n] - k[n - 1]), 1, 0]
         elif boundary_condition == "zero-curvature":
-            A4 = np.array(
-                [[2, 0, 0] + [0, 0, 0] * (n - 1), [0, 0, 0] * (n - 1) + [2, 0, 0]]
-            )
-        b4 = np.array([[0], [0]])
-
-        A[0] = A4[0]
-        A[-1] = A4[-1]
-        b = np.empty((3 * n, 1))
-        b[0] = b4[0]
-        b[1 : (3 * n - 1) : 3] = b3
-        b[2 : (3 * n - 3) : 3] = b1
-        b[3 : (3 * n - 2) : 3] = b2
-        b[-1] = b4[-1]
+            A[0, :3] = [2, 0, 0]
+            A[-1, -3:] = [2, 0, 0]
 
         # x = np.linalg.solve(A, b)
         n_below, n_above = scipy.linalg.bandwidth(A)
