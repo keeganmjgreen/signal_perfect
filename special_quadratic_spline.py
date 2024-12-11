@@ -34,9 +34,10 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
 
         n = len(k) - 1
 
-        A1 = np.zeros((n - 1, 3 * n))
+        A = np.zeros((3 * n, 3 * n))
+
         for i in range(1, n):
-            A1[i - 1, 3 * (i - 1) : 3 * (i - 1) + 6] = [
+            A[2 + 3 * (i - 1), 3 * (i - 1) : 3 * (i - 1) + 6] = [
                 -((k[i] - k[i - 1]) ** 2),
                 -(k[i] - k[i - 1]),
                 -1,
@@ -46,9 +47,8 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             ]
         b1 = np.zeros((n - 1, 1))
 
-        A2 = np.zeros((n - 1, 3 * n))
         for i in range(1, n):
-            A2[i - 1, 3 * (i - 1) : 3 * (i - 1) + 6] = [
+            A[3 + 3 * (i - 1), 3 * (i - 1) : 3 * (i - 1) + 6] = [
                 -2 * (k[i] - k[i - 1]),
                 -1,
                 0,
@@ -58,9 +58,8 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             ]
         b2 = np.zeros((n - 1, 1))
 
-        A3 = np.zeros((n, 3 * n))
         for i in range(0, n):
-            A3[i, 3 * i : 3 * i + 3] = [
+            A[1 + 3 * i, 3 * i : 3 * i + 3] = [
                 2 * (k[i + 1] - k[i]) ** 3,
                 3 * (k[i + 1] - k[i]) ** 2,
                 6 * (k[i + 1] - k[i]),
@@ -80,11 +79,7 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             )
         b4 = np.array([[0], [0]])
 
-        A = np.empty((3 * n, 3 * n))
         A[0] = A4[0]
-        A[1 : (3 * n - 1) : 3] = A3
-        A[2 : (3 * n - 3) : 3] = A1
-        A[3 : (3 * n - 2) : 3] = A2
         A[-1] = A4[-1]
         b = np.empty((3 * n, 1))
         b[0] = b4[0]
