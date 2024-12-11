@@ -73,8 +73,7 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             A[-1, -3:] = [2, 0, 0]
 
         # x = np.linalg.solve(A, b)
-        n_below, n_above = scipy.linalg.bandwidth(A)
-        ab = SpecialQuadraticSpline._to_banded(n_above, n_below, a=A)
+        ab = SpecialQuadraticSpline._to_banded(n_above=3, n_below=3, a=A)
         n_below, _ = scipy.linalg.bandwidth(ab[::-1])  # TODO: Check.
         l = u = ab.shape[0] - n_below - 1  # TODO: Check.
         x = scipy.linalg.solve_banded(l_and_u=(l, u), ab=ab, b=b)

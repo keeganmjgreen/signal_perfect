@@ -67,7 +67,7 @@ def make_random_signal(signal_length: int) -> pd.Series:
     return pd.Series(signal_values)
 
 
-@pytest.mark.parametrize("signal_length", [5000])
+@pytest.mark.parametrize("signal_length", [10000])
 def test_performance(signal_length, benchmark):
     def make_spline():
         sqs = SpecialQuadraticSpline.from_regular_series(
