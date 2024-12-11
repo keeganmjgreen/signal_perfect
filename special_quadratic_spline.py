@@ -34,11 +34,11 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
 
         n = len(k) - 1
 
-        A = np.zeros((3 * n, 3 * n))
+        A = np.zeros((3 * n, 7))
         b = np.zeros(3 * n)
 
         for i in range(1, n):
-            A[2 + 3 * (i - 1), 3 * (i - 1) : 3 * (i - 1) + 6] = [
+            A[2 + 3 * (i - 1), 1 : 1 + 6] = [
                 -((k[i] - k[i - 1]) ** 2),
                 -(k[i] - k[i - 1]),
                 -1,
@@ -48,7 +48,7 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             ]
 
         for i in range(1, n):
-            A[3 + 3 * (i - 1), 3 * (i - 1) : 3 * (i - 1) + 6] = [
+            A[3 + 3 * (i - 1), 0 : 0 + 6] = [
                 -2 * (k[i] - k[i - 1]),
                 -1,
                 0,
@@ -58,7 +58,7 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             ]
 
         for i in range(0, n):
-            A[1 + 3 * i, 3 * i : 3 * i + 3] = [
+            A[1 + 3 * i, 2 : 2 + 3] = [
                 2 * (k[i + 1] - k[i]) ** 3,
                 3 * (k[i + 1] - k[i]) ** 2,
                 6 * (k[i + 1] - k[i]),
@@ -66,38 +66,21 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             b[1 + 3 * i] = 6 * y[i] * (k[i + 1] - k[i])
 
         if boundary_condition == "zero-slope":
-            A[0, :3] = [0, 1, 0]
-            A[-1, -3:] = [2 * (k[n] - k[n - 1]), 1, 0]
+            A[0, 3 : 3 + 3] = [0, 1, 0]
+            A[-1, 1 : 1 + 3] = [2 * (k[n] - k[n - 1]), 1, 0]
         elif boundary_condition == "zero-curvature":
-            A[0, :3] = [2, 0, 0]
-            A[-1, -3:] = [2, 0, 0]
+            A[0, 3 : 3 + 3] = [2, 0, 0]
+            A[-1, 1 : 1 + 3] = [2, 0, 0]
 
-        # x = np.linalg.solve(A, b)
-        ab = SpecialQuadraticSpline._to_banded(n_above=3, n_below=3, a=A)
-        n_below, _ = scipy.linalg.bandwidth(ab[::-1])  # TODO: Check.
-        l = u = ab.shape[0] - n_below - 1  # TODO: Check.
-        x = scipy.linalg.solve_banded(l_and_u=(l, u), ab=ab, b=b)
+        for col in range(7):
+            A[:, col] = np.roll(A[:, col], shift=(col - 3), axis=0)
+        A = np.rot90(A)
+
+        n_below, _ = scipy.linalg.bandwidth(A[::-1])  # TODO: Check.
+        l = u = A.shape[0] - n_below - 1  # TODO: Check.
+        x = scipy.linalg.solve_banded(l_and_u=(l, u), ab=A, b=b)
 
         super().__init__(c=x.reshape((n, 3)).T, x=k)
-
-    @staticmethod
-    def _to_banded(n_below: int, n_above: int, a: np.ndarray) -> np.ndarray:
-        """Convert a square, banded matrix `a` to diagonal ordered form (consumable by
-        `np.linalg.solve_banded`).
-
-        Function copied from the following recent SciPy PR, until it is released.
-        https://github.com/scipy/scipy/pull/21726/files.
-        """
-
-        n = a.shape[0]
-        rows = n_above + n_below + 1
-        ab = np.zeros((rows, n), dtype=a.dtype)
-        ab[n_above] = np.diag(a)
-        for i in range(1, n_above + 1):
-            ab[n_above - i, i:] = np.diag(a, i)
-        for i in range(1, n_below + 1):
-            ab[n_above + i, :-i] = np.diag(a, -i)
-        return ab
 
     @staticmethod
     def _convert_knots(knots: list[float]) -> list[float]:
