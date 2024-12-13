@@ -28,11 +28,6 @@ $$ \mathbf{x} = \begin{bmatrix} a_0 & b_0 & c_0 & \cdots & a_{n-1} & b_{n-1} & c
 
 $$ \mathbf{b}_1 = \begin{bmatrix} 0 & \dots & 0 \end{bmatrix}^\mathrm{T} $$
 
-```python
-# Written in Python:
-b1 = np.zeros((n-1, 1))
-```
-
 $$
 A_1 =
 \begin{bmatrix}
@@ -42,10 +37,6 @@ A_1 =
     0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -k_{n-1}^2 & -k_{n-1} & -1 & k_{n-1}^2 & k_{n-1} & 1
 \end{bmatrix}
 $$
-
-```python
-A1 = np.array([[0, 0, 0] * (i-1) + [-k[i]**2, -k[i], -1, k[i]**2, k[i], 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
-```
 
 When using `numpy.PPoly`, however, each polynomial piece, regardless of what range on the $x$-axis it spans in the piecewise function,  is expressed in terms of $x$ starting at zero. This is a way of "normalizing" each polynomial and avoiding sensitive coefficients. Thus, the $k_i$ for an $(a_i,b_i,c_i)$ triple is replaced with zero and the $k_i$ for an $(a_{i-1},b_{i-1},c_{i-1})$ triple is replaced with its distance from zero, $k_i-k_{i-1}$, as follows:
 
@@ -58,10 +49,6 @@ A_1 =
     0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -(k_n - k_{n-1})^2 & -(k_n - k_{n-1}) & -1 & 0 & 0 & 1
 \end{bmatrix}
 $$
-
-```python
-A1 = np.array([[0, 0, 0] * (i-1) + [-(k[i] - k[i-1])**2, -(k[i] - k[i-1]), -1, 0, 0, 1] + [0, 0, 0] * (n-i-1) for i in range(1, n)])
-```
 
 We need $2n+1$ more equations.
 
@@ -85,10 +72,6 @@ This represents another $n-1$ linear equations, which can be expressed in the fo
 
 $$ \mathbf{b}_2 = \begin{bmatrix} 0 & \dots & 0 \end{bmatrix}^\mathrm{T} $$
 
-```python
-b2 = np.zeros((n-1, 1))
-```
-
 $$
 A_2 =
 \begin{bmatrix}
@@ -98,10 +81,6 @@ A_2 =
     0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -2 k_n & -1 & 0 & 2 k_n & 1 & 0
 \end{bmatrix}
 $$
-
-```python
-A2 = np.array([[0, 0, 0] * (i-1) + [-2 * k[i], -1, 0, 2 * k[i], 1, 0] + [0, 0, 0] * (n-i-1)  for i in range(1, n)])
-```
 
 Again, replacing the $k_i$ for each $(a_i,b_i,c_i)$ triple with zero, and replacing the $k_i$ for each $(a_{i-1},b_{i-1},c_{i-1})$ triple with $k_i-k_{i-1}$, yields:
 
@@ -114,10 +93,6 @@ A_2 =
     0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \dots & -2 (k_n - k_{n-1}) & -1 & 0 & 0 & 1 & 0
 \end{bmatrix}
 $$
-
-```python
-A2 = np.array([[0, 0, 0] * (i-1) + [-2 * (k[i] - k[i-1]), -1, 0, 0, 1, 0] + [0, 0, 0] * (n-i-1)  for i in range(1, n)])
-```
 
 Now we need $n+2$ more equations.
 
@@ -151,10 +126,6 @@ $$
 \end{bmatrix}
 $$
 
-```python
-b3 = np.array([[6 * y[i] * (k[i+1] - k[i])] for i in range(0, n)])
-```
-
 $$
 A_3 =
 \begin{bmatrix}
@@ -164,10 +135,6 @@ A_3 =
     0 & 0 & 0 & 0 & 0 & 0 & \dots & 2 (k_n^3 - k_{n-1}^3) & 3 (k_n^2 - k_{n-1}^2) & 6 (k_n - k_{n-1})
 \end{bmatrix}
 $$
-
-```python
-A3 = np.array([[0, 0, 0] * (i-1) + [2 * (k[i]**3 - k[i-1]**3), 3 * (k[i]**2 - k[i-1]**2), 6 * (k[i] - k[i-1])] + [0, 0, 0] * (n-i) for i in range(1, n+1)])
-```
 
 Replacing the $k_i$ and $k_{i+1}$ for each $(a_i,b_i,c_i)$ triple with zero and $k_{i+1}-k_i$ respectively yields:
 
@@ -180,10 +147,6 @@ A_3 =
     0 & 0 & 0 & 0 & 0 & 0 & \dots & 2 (k_n - k_{n-1})^3 & 3 (k_n - k_{n-1})^2 & 6 (k_n - k_{n-1})
 \end{bmatrix}
 $$
-
-```python
-A3 = np.array([[0, 0, 0] * (i-1) + [2 * (k[i] - k[i-1])**3, 3 * (k[i] - k[i-1])**2, 6 * (k[i] - k[i-1])] + [0, 0, 0] * (n-i) for i in range(1, n+1)])
-```
 
 (While it includes $k_i$ terms, the same substitution in $\mathbf{b}_3$ results in no change.)
 
@@ -203,10 +166,6 @@ This represents another $2$ linear equations, which can be expressed in the form
 
 $$ \mathbf{b}_4 = \begin{bmatrix} 0 & 0 \end{bmatrix}^\mathrm{T} $$
 
-```python
-b4 = np.array([[0], [0]])
-```
-
 $$
 A_4 =
 \begin{bmatrix}
@@ -214,10 +173,6 @@ A_4 =
     0 & 0 & 0 & \cdots & 2 k_n & 1 & 0
 \end{bmatrix}
 $$
-
-```python
-A4 = np.array([[2 * k[0], 1, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2 * k[n], 1, 0]])
-```
 
 Replacing $k_0$ and $k_n$ with zero and $k_n-k_{n-1}$ respectively yields:
 
@@ -228,10 +183,6 @@ A_4 =
     0 & 0 & 0 & \cdots & 2 (k_n - k_{n-1}) & 1 & 0
 \end{bmatrix}
 $$
-
-```python
-A4 = np.array([[0, 1, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2 * (k[n] - k[n-1]), 1, 0]])
-```
 
 ### "Zero-curvature boundary conditions" variant
 
@@ -250,10 +201,6 @@ A_4 =
     0 & 0 & 0 & \cdots & 2 & 0 & 0
 \end{bmatrix}
 $$
-
-```python
-A4 = np.array([[2, 0, 0] + [0, 0, 0] * (n-1), [0, 0, 0] * (n-1) + [2, 0, 0]])
-```
 
 ##
 
