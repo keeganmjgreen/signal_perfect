@@ -331,6 +331,16 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#linear-algebra-computing-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linear algebra computing strategies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linear algebra computing strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#optimal-ordering-of-the-a-matrix-to-minimize-its-bandwidth" class="md-nav__link">
     <span class="md-ellipsis">
       Optimal ordering of the \(A\) matrix to minimize its bandwidth
@@ -338,8 +348,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#direct-construction-of-the-banded-a-matrix-in-banded-storage-format" class="md-nav__link">
     <span class="md-ellipsis">
       Direct construction of the banded \(A\) matrix in banded storage format
@@ -347,13 +357,18 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#using-a-linear-solver-optimized-for-a-banded-a-matrix" class="md-nav__link">
     <span class="md-ellipsis">
       Using a linear solver optimized for a banded \(A\) matrix
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -392,6 +407,16 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#linear-algebra-computing-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linear algebra computing strategies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linear algebra computing strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#optimal-ordering-of-the-a-matrix-to-minimize-its-bandwidth" class="md-nav__link">
     <span class="md-ellipsis">
       Optimal ordering of the \(A\) matrix to minimize its bandwidth
@@ -399,8 +424,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#direct-construction-of-the-banded-a-matrix-in-banded-storage-format" class="md-nav__link">
     <span class="md-ellipsis">
       Direct construction of the banded \(A\) matrix in banded storage format
@@ -408,13 +433,18 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#using-a-linear-solver-optimized-for-a-banded-a-matrix" class="md-nav__link">
     <span class="md-ellipsis">
       Using a linear solver optimized for a banded \(A\) matrix
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -451,26 +481,28 @@
 </html>
 
 <p>To put this in perspective, consider two year&rsquo;s worth of a 24/7 time series with 1-minute resolution. SignalPerfect can fit a special quadratic spline to these ~1M data points in a mere 2.5 seconds, even though this requires solving an enormous linear system with ~3M unknowns (the spline&rsquo;s parameters).</p>
-<p>The instantiation of the <code>SpecialQuadraticSpline</code> class &mdash; the creation of the special quadratic spline itself &mdash; is the most computationally expensive code, compared to the methods of the class. Where <span class="arithmatex">\(n\)</span> is <code>len(k)</code> or <code>len(y) + 1</code>, <code>SpecialQuadraticSpline(k, y)</code> has a computational complexity of <span class="arithmatex">\(O(n)\)</span> rather than <span class="arithmatex">\(O(n^3)\)</span>, thanks to the following linear algebra strategies with which <code>SpecialQuadraticSpline</code>&rsquo;s constructor is implemented.</p>
-<h2 id="optimal-ordering-of-the-a-matrix-to-minimize-its-bandwidth">Optimal ordering of the <span class="arithmatex">\(A\)</span> matrix to minimize its bandwidth</h2>
+<p>The instantiation of the <code>SpecialQuadraticSpline</code> class &mdash; the creation of the special quadratic spline itself &mdash; is the most computationally expensive code, compared to the methods of the class. Where <span class="arithmatex">\(n\)</span> is <code>len(k)</code> or <code>len(y) + 1</code>, <code>SpecialQuadraticSpline(k, y)</code> has a computational complexity of <span class="arithmatex">\(O(n)\)</span> rather than <span class="arithmatex">\(O(n^3)\)</span>, thanks to the following linear algebra computing strategies with which <code>SpecialQuadraticSpline</code>&rsquo;s constructor is implemented.</p>
+<h2 id="linear-algebra-computing-strategies">Linear algebra computing strategies</h2>
+<h3 id="optimal-ordering-of-the-a-matrix-to-minimize-its-bandwidth">Optimal ordering of the <span class="arithmatex">\(A\)</span> matrix to minimize its bandwidth</h3>
 <p>The four submatrices <span class="arithmatex">\(A_1\)</span>, <span class="arithmatex">\(A_2\)</span>, <span class="arithmatex">\(A_3\)</span>, and <span class="arithmatex">\(A_4\)</span> from the <a href="../derivation/">Derivation</a> must be combined into one matrix <span class="arithmatex">\(A\)</span> (and similarly the four subvectors <span class="arithmatex">\(\mathbf{b}_1\)</span>, <span class="arithmatex">\(\mathbf{b}_2\)</span>, <span class="arithmatex">\(\mathbf{b}_3\)</span>, and <span class="arithmatex">\(\mathbf{b}_4\)</span>) must be combined into one vector <span class="arithmatex">\(\mathbf{b}\)</span>) in order to solve the unified linear system <span class="arithmatex">\(A\mathbf{x}=\mathbf{b}\)</span>.</p>
 <p>This can be done by simply stacking/concatenating the four <span class="arithmatex">\(A\)</span> submatrices (and similarly four <span class="arithmatex">\(\mathbf{b}\)</span> subvectors) as follows:</p>
 <p><img alt="" src="../matrices-original_a_matrix.svg" /></p>
 <p>In the diagram, white-shaded cells are necessarily zero and gray-shaded cells may be nonzero (but will be referred to as nonzero cells for simplicity).</p>
-<p>As can be seen, the first three <span class="arithmatex">\(A\)</span> submatrices are somewhat <em>banded</em> from their top-left to bottom-right cells, and as a result the stacked <span class="arithmatex">\(A\)</span> matrix has a few bands. Banded matrices are easier to work with (see both of the following sections), but the stacked <span class="arithmatex">\(A\)</span> matrix is not actually banded and would have to be treated as a square matrix for purposes of both storage and solving. Regarding storage, such a square matrix occupies a whopping <span class="arithmatex">\((3n)(3n)=9n^2\)</span> floating-point addresses in memory, even though the overwhelming majority of cells are zero. And more importantly, <em>solving</em> a linear system whose <span class="arithmatex">\(A\)</span> matrix is in square format is extremely inefficient, with complexity <span class="arithmatex">\(O(N^3)\)</span>.</p>
+<p>As can be seen, the first three <span class="arithmatex">\(A\)</span> submatrices are somewhat <em>banded</em> from their top-left to bottom-right cells, and as a result the stacked <span class="arithmatex">\(A\)</span> matrix has a few bands. Banded matrices are easier to work with (see both of the following subsections), but the stacked <span class="arithmatex">\(A\)</span> matrix is not actually banded and would have to be treated as a square matrix for purposes of both storage and solving. Regarding storage, such a square matrix occupies a whopping <span class="arithmatex">\((3n)(3n)=9n^2\)</span> floating-point addresses in memory, even though the overwhelming majority of cells are zero. And more importantly, <em>solving</em> a linear system whose <span class="arithmatex">\(A\)</span> matrix is in square format is extremely inefficient, with complexity <span class="arithmatex">\(O(N^3)\)</span>.</p>
 <p>Having an <span class="arithmatex">\(A\)</span> matrix that is not only sparse but also banded and with as narrow a <em>bandwidth</em> as possible is highly desirable. Such an <span class="arithmatex">\(A\)</span> matrix can be achieved using algorithms that permute (reorder) the rows and/or columns in an existing <span class="arithmatex">\(A\)</span> matrix. These algorithms often operate on symmetric matrices, but can be adapted to asymmetric matrices (such as ours). One algorithm is Alan George and Joseph Liu&rsquo;s Reverse Cuthill&ndash;McKee (RCM) algorithm, implemented by <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csgraph.reverse_cuthill_mckee.html"><code>scipy.sparse.csgraph.reverse_cuthill_mckee</code></a>. The RCM algorithm builds upon the <a href="(https://dl.acm.org/doi/10.1145/800195.805928)">original</a> one developed by Elizabeth Cuthill and James McKee. This field of research is well established, as evidenced by the Cuthill&ndash;McKee algorithm being published in the same year as the moon landing. However, the problem of minimizing a matrix&rsquo;s bandwidth is NP-hard and it should not be surprising that RCM performed poorly on our stacked <span class="arithmatex">\(A\)</span> matrix with a few thousand rows and columns, as small as that might be.</p>
 <p>Knowing the patterned layout of our matrix, the above problem was solved by using a systematic approach to reorder our matrix&rsquo;s rows. This approach is faster, simpler, and guaranteed to be optimal for any <span class="arithmatex">\(n\)</span>. It is illustrated with the following diagram, which shows the final order of the rows from the four <span class="arithmatex">\(A\)</span> submatrices:</p>
 <p><img alt="" src="../matrices-reordered_to_minimize_bandwidth.svg" /></p>
 <p>In the diagram, the dark-green-shaded cells are the matrix&rsquo;s diagonal. Together with the light-green-shaded cells, the matrix&rsquo;s band is shown, with an upper and lower bandwidth of 3.</p>
-<h2 id="direct-construction-of-the-banded-a-matrix-in-banded-storage-format">Direct construction of the banded <span class="arithmatex">\(A\)</span> matrix in banded storage format</h2>
-<p>Consider the banded <span class="arithmatex">\(A\)</span> matrix from the previous section. Its zero cells can be removed and its nonzero cells can be shifted into a significantly smaller, non-square matrix of shape <span class="arithmatex">\(7\times3n\)</span>:</p>
+<h3 id="direct-construction-of-the-banded-a-matrix-in-banded-storage-format">Direct construction of the banded <span class="arithmatex">\(A\)</span> matrix in banded storage format</h3>
+<p>Consider the banded <span class="arithmatex">\(A\)</span> matrix from the previous subsection. Its zero cells can be removed and its nonzero cells can be shifted into a significantly smaller, non-square matrix of shape <span class="arithmatex">\(7\times3n\)</span>:</p>
 <p><img alt="" src="../matrices-row_major_banded_storage_format.svg" /></p>
 <p>As can be seen in the diagram, the <span class="arithmatex">\(A\)</span> matrix&rsquo;s band is now stored vertically, with its diagonal as the center column.</p>
 <p>Such a format is often used for banded matrices to drastically reduce their memory footprint, and as a result linear algebra algorithms often operate on matrices in this format. Indeed, the to-be-used <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve_banded.html"><code>scipy.linalg.solve_banded</code></a> function is no exception. However, constructing the square <span class="arithmatex">\(A\)</span> matrix and then converting to the required format would both defeat the purpose of reduced memory footprint and demand unnecessary additional computations for the conversion. Instead, <code>SpecialQuadraticSpline</code> constructs the <span class="arithmatex">\(A\)</span> matrix in the above format directly.</p>
 <p>In the above diagram, the <span class="arithmatex">\(i\)</span> indices of each row&rsquo;s cell values are the same, so this format will be termed &ldquo;row-major banded storage format&rdquo;, in contrast to &ldquo;column-major banded storage format&rdquo; of shape <span class="arithmatex">\(3n\times7\)</span> in which the <span class="arithmatex">\(j\)</span> values of each <em>column</em>&rsquo;s cell values are the same. The row-major banded storage format is convenient to construct in our case, but <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve_banded.html"><code>scipy.linalg.solve_banded</code></a> expects a matrix in the column-major banded storage format, so a computationally lightweight conversion is required: <code>SpecialQuadraticSpline</code> applies <a href="https://numpy.org/doc/stable/reference/generated/numpy.roll.html"><code>numpy.roll</code></a> as illustrated above and rotates the matrix by 90 degrees. This produces the column-major banded storage format, shown as follows:</p>
 <p><img alt="" src="../matrices-column_major_banded_storage_format.svg" /></p>
-<h2 id="using-a-linear-solver-optimized-for-a-banded-a-matrix">Using a linear solver optimized for a banded <span class="arithmatex">\(A\)</span> matrix</h2>
+<h3 id="using-a-linear-solver-optimized-for-a-banded-a-matrix">Using a linear solver optimized for a banded <span class="arithmatex">\(A\)</span> matrix</h3>
 <p>Where possible, using <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve_banded.html"><code>scipy.linalg.solve_banded</code></a> instead of <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve.html"><code>scipy.linalg.solve</code></a> or <a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html"><code>numpy.linalg.solve</code></a> is much more efficient, with a complexity of <span class="arithmatex">\(O(n)\)</span> instead of <span class="arithmatex">\(O(n^3)\)</span>. And of course, using the column-major banded storage format, <code>SpecialQuadraticSpline</code> leverages this to solve for its spline&rsquo;s <span class="arithmatex">\(3n\)</span> parameters extremely quickly. In fact, this is the fastest part of <code>SpecialQuadraticSpline</code>&rsquo;s instantiation.</p>
+<p><br><br><br><br><br> <!-- Add some whitespace. --></p>
 
 
 
