@@ -155,8 +155,8 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
                 fig.add_vline(x=knot, line_dash="dash", line_width=0.5)
             # Plot input data series:
             fig.add_scatter(
-                x=self.k,
-                y=[*self.y, self.y[-1]],
+                x=[self.k[0], *self.k[1:-1].repeat(2), self.k[-1]],
+                y=[*self.y[:-1].repeat(2), self.y[-1]],
                 line_shape="hv",
                 mode="lines",
                 line_color="#42A5F5",
