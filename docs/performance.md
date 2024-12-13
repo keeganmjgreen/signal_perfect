@@ -47,3 +47,5 @@ In the above diagram, the $i$ indices of each row's cell values are the same, so
 ### Using a linear solver optimized for a banded $A$ matrix
 
 Where possible, using [`scipy.linalg.solve_banded`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve_banded.html) instead of [`scipy.linalg.solve`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve.html) or [`numpy.linalg.solve`](https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html) is much more efficient, with a complexity of $O(n)$ instead of $O(n^3)$. And of course, using the column-major banded storage format, `SpecialQuadraticSpline` leverages this to solve for its spline's $3n$ parameters extremely quickly. In fact, this is the fastest part of `SpecialQuadraticSpline`'s instantiation.
+
+<br><br><br><br><br> <!-- Add some whitespace. -->

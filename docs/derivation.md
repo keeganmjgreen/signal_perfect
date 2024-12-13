@@ -205,3 +205,5 @@ $$
 ##
 
 It is interesting to note that the $A$ matrix is only in terms of the knots and the $\mathbf{b}$ vector is only in terms of the signal values.
+
+<br><br><br><br><br> <!-- Add some whitespace. -->
