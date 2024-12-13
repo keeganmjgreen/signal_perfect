@@ -63,19 +63,26 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
         # Set row elements of matrix A corresponding to submatrix A3, and elements of vector b
         #     corresponding to subvector b3 (interval average constraint):
         for i in range(0, n):
-            A[1 + 3 * i, 2 : 2 + 3] = [
-                2 * (k[i + 1] - k[i]) ** 3,
-                3 * (k[i + 1] - k[i]) ** 2,
-                6 * (k[i + 1] - k[i]),
-            ]
-            b[1 + 3 * i] = 6 * y[i] * (k[i + 1] - k[i])
+            if not np.isnan(y[i]):
+                A[1 + 3 * i, 2 : 2 + 3] = [
+                    2 * (k[i + 1] - k[i]) ** 3,
+                    3 * (k[i + 1] - k[i]) ** 2,
+                    6 * (k[i + 1] - k[i]),
+                ]
+                b[1 + 3 * i] = 6 * y[i] * (k[i + 1] - k[i])
+            else:
+                # This interval's y value is missing. Constrain this interval's spline segment to be
+                #     linear (by constraining its polynomial term a to zero):
+                A[1 + 3 * i, 2] = 1
 
         # Set rows of matrix A from submatrix A4 (boundary conditions constraint):
-        if boundary_condition == "zero-slope":
+        if boundary_condition == "zero-slope" or np.isnan(y[0]):
             A[0, 3 : 3 + 3] = [0, 1, 0]
-            A[-1, 1 : 1 + 3] = [2 * (k[n] - k[n - 1]), 1, 0]
         elif boundary_condition == "zero-curvature":
             A[0, 3 : 3 + 3] = [2, 0, 0]
+        if boundary_condition == "zero-slope" or np.isnan(y[-1]):
+            A[-1, 1 : 1 + 3] = [2 * (k[n] - k[n - 1]), 1, 0]
+        elif boundary_condition == "zero-curvature":
             A[-1, 1 : 1 + 3] = [2, 0, 0]
 
         # Convert matrix A from "row-major banded storage format" (which was easy to construct, as
