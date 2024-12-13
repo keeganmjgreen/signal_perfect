@@ -180,30 +180,34 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             for i in range(len(k) - 1)
         ]
         if plot:
-            fig = self.plot(include="spline")
-            fig.add_scatter(
-                x=k,
-                y=[*series, series[-1]],
-                line_shape="hv",
-                mode="lines",
-                line_color="#66BB6A",
-                name="Output data series<br>(sampled from special quadratic spline)",
-            )
-            for i, knot in enumerate(k):
-                fig.add_vline(
-                    x=knot,
-                    line_dash="dash",
-                    line_width=0.5,
-                    label=dict(
-                        text=f"<i>k</i><sub>{i}</sub> = {knot}",
-                        font_color="#43A047",
-                        textposition="end",
-                        textangle=0,
-                        padding=3,
-                    ),
-                )
+            fig = self.plot_output_series(k, series)
             fig.show()
         return series
+
+    def plot_output_series(self, k: list[float], series: list[float]) -> go.Figure:
+        fig = self.plot(include="spline")
+        fig.add_scatter(
+            x=k,
+            y=[*series, series[-1]],
+            line_shape="hv",
+            mode="lines",
+            line_color="#66BB6A",
+            name="Output data series<br>(sampled from special quadratic spline)",
+        )
+        for i, knot in enumerate(k):
+            fig.add_vline(
+                x=knot,
+                line_dash="dash",
+                line_width=0.5,
+                label=dict(
+                    text=f"<i>k</i><sub>{i}</sub> = {knot}",
+                    font_color="#43A047",
+                    textposition="end",
+                    textangle=0,
+                    padding=3,
+                ),
+            )
+        return fig
 
     def get_regular_series(self, index: pd.Index, plot: bool = False) -> pd.Series:
         return pd.Series(
