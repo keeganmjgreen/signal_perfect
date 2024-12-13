@@ -34,9 +34,11 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
 
         n = len(k) - 1
 
-        A = np.zeros((3 * n, 7))
+        # Initialize matrix A and vector b to zeros.
+        A = np.zeros((3 * n, 7))  # Banded storage format (not stored as square matrix).
         b = np.zeros(3 * n)
 
+        # Set row elements of matrix A corresponding to submatrix A1 (knot constraint):
         for i in range(1, n):
             A[2 + 3 * (i - 1), 1 : 1 + 6] = [
                 -((k[i] - k[i - 1]) ** 2),
@@ -47,6 +49,7 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
                 1,
             ]
 
+        # Set row elements of matrix A corresponding to submatrix A2 (knot derivative constraint):
         for i in range(1, n):
             A[3 + 3 * (i - 1), 0 : 0 + 6] = [
                 -2 * (k[i] - k[i - 1]),
@@ -57,6 +60,8 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
                 0,
             ]
 
+        # Set row elements of matrix A corresponding to submatrix A3, and elements of vector b
+        #     corresponding to subvector b3 (interval average constraint):
         for i in range(0, n):
             A[1 + 3 * i, 2 : 2 + 3] = [
                 2 * (k[i + 1] - k[i]) ** 3,
@@ -65,6 +70,7 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             ]
             b[1 + 3 * i] = 6 * y[i] * (k[i + 1] - k[i])
 
+        # Set rows of matrix A from submatrix A4 (boundary conditions constraint):
         if boundary_condition == "zero-slope":
             A[0, 3 : 3 + 3] = [0, 1, 0]
             A[-1, 1 : 1 + 3] = [2 * (k[n] - k[n - 1]), 1, 0]
@@ -72,12 +78,15 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
             A[0, 3 : 3 + 3] = [2, 0, 0]
             A[-1, 1 : 1 + 3] = [2, 0, 0]
 
+        # Convert matrix A from "row-major banded storage format" (which was easy to construct, as
+        #     above) to "column-major banded storage format" (required by
+        #     `scipy.linalg.solve_banded`):
         for col in range(7):
             A[:, col] = np.roll(A[:, col], shift=(col - 3), axis=0)
         A = np.rot90(A)
 
-        n_below, _ = scipy.linalg.bandwidth(A[::-1])  # TODO: Check.
-        l = u = A.shape[0] - n_below - 1  # TODO: Check.
+        n_below, _ = scipy.linalg.bandwidth(A[::-1])
+        l = u = A.shape[0] - n_below - 1
         x = scipy.linalg.solve_banded(l_and_u=(l, u), ab=A, b=b)
 
         super().__init__(c=x.reshape((n, 3)).T, x=k)
