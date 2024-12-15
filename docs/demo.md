@@ -22,8 +22,8 @@ Note that this is quite different to something like a polynomial fit or cubic sm
 Now, the special quadratic spline can be sampled using the `get_series` method:
 
 ```python
->>> sqs.get_series(k=[0, 5, 6, 7, 7.5], plot=True)
-[3.2321428571428568, 9.918650793650794, 4.581349206349206, 0.839285714285714]
+>>> sqs.get_series(k=[5, 6, 7, 8], plot=True)
+[10.124367947293063, 4.3756320527069406, 6.0]
 ```
 
 --8<-- "docs/demo/spline,output.html"
