@@ -32,10 +32,13 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
 
         # Set row elements of matrix A corresponding to submatrix A1 (knot constraint):
         for i in range(1, n):
-            A[4 + 6 * (i - 1), 1 : 1 + 6] = [
+            A[4 + 6 * (i - 1), 1 : 1 + 9] = [
                 -((k[i] - k[i - 1]) ** 2),
                 -(k[i] - k[i - 1]),
                 -1,
+                0,
+                0,
+                0,
                 0,
                 0,
                 1,
@@ -43,9 +46,12 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
 
         # Set row elements of matrix A corresponding to submatrix A2 (knot derivative constraint):
         for i in range(1, n):
-            A[5 + 6 * (i - 1), 0 : 0 + 6] = [
+            A[5 + 6 * (i - 1), 0 : 0 + 9] = [
                 -2 * (k[i] - k[i - 1]),
                 -1,
+                0,
+                0,
+                0,
                 0,
                 0,
                 1,
