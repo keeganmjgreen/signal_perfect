@@ -94,13 +94,15 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
 
         # A6:
         for i in range(0, n):
-            A[3 + 6 * i, 2 : 2 + 6] = [
+            A[3 + 6 * i, 0 : 0 + 8] = [
+                (1 if i != 0 else 0),
+                0,
                 2 / 3 * (k[i + 1] - k[i]) ** 3,
                 (k[i + 1] - k[i]) ** 2,
                 2 * (k[i + 1] - k[i]),
                 1,
                 (-1 if i != n - 1 else 0),
-                (1 if i != n - 1 else 0),
+                0,
             ]
             b[3 + 6 * i] = 2 * y[i] * (k[i + 1] - k[i])
 
