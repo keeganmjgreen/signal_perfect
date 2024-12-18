@@ -11,36 +11,28 @@ import scipy.linalg
 import scipy.sparse
 import scipy.sparse.csgraph
 
-BoundaryCondition = Literal["zero-slope", "zero-curvature"]
-
 
 class SpecialQuadraticSpline(scipy.interpolate.PPoly):
     k: list[float]
     """Knots: x-values splitting up the signal into intervals/blocks."""
     y: list[float]
     """The average value of the signal over each interval."""
-    boundary_condition: BoundaryCondition
 
-    def __init__(
-        self,
-        k: list[float],
-        y: list[float],
-        boundary_condition: BoundaryCondition = "zero-curvature",
-    ):
+    def __init__(self, k: list[float], y: list[float]):
         self.k = deepcopy(k)
         k = SpecialQuadraticSpline._convert_knots(knots=k)
         self.y = y
-        self.boundary_condition = boundary_condition
 
         n = len(k) - 1
 
         # Initialize matrix A and vector b to zeros.
-        A = np.zeros((3 * n, 7))  # Banded storage format (not stored as square matrix).
-        b = np.zeros(3 * n)
+        A = np.zeros((6 * n - 2, 10))
+        # ^ Banded storage format (not stored as square matrix).
+        b = np.zeros(6 * n - 2)
 
         # Set row elements of matrix A corresponding to submatrix A1 (knot constraint):
         for i in range(1, n):
-            A[2 + 3 * (i - 1), 1 : 1 + 6] = [
+            A[4 + 6 * (i - 1), 1 : 1 + 6] = [
                 -((k[i] - k[i - 1]) ** 2),
                 -(k[i] - k[i - 1]),
                 -1,
@@ -51,7 +43,7 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
 
         # Set row elements of matrix A corresponding to submatrix A2 (knot derivative constraint):
         for i in range(1, n):
-            A[3 + 3 * (i - 1), 0 : 0 + 6] = [
+            A[5 + 6 * (i - 1), 0 : 0 + 6] = [
                 -2 * (k[i] - k[i - 1]),
                 -1,
                 0,
@@ -64,39 +56,64 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
         #     corresponding to subvector b3 (interval average constraint):
         for i in range(0, n):
             if not np.isnan(y[i]):
-                A[1 + 3 * i, 2 : 2 + 3] = [
+                A[0 + 6 * i, 5 : 5 + 3] = [
                     2 * (k[i + 1] - k[i]) ** 3,
                     3 * (k[i + 1] - k[i]) ** 2,
                     6 * (k[i + 1] - k[i]),
                 ]
-                b[1 + 3 * i] = 6 * y[i] * (k[i + 1] - k[i])
+                b[0 + 6 * i] = 6 * y[i] * (k[i + 1] - k[i])
             else:
                 # This interval's y value is missing. Constrain this interval's spline segment to be
                 #     linear (by constraining its polynomial term a to zero):
-                A[1 + 3 * i, 2] = 1
+                A[0 + 6 * i, 5] = 1
 
-        # Set rows of matrix A from submatrix A4 (boundary conditions constraint):
-        if boundary_condition == "zero-slope" or np.isnan(y[0]):
-            A[0, 3 : 3 + 3] = [0, 1, 0]
-        elif boundary_condition == "zero-curvature":
-            A[0, 3 : 3 + 3] = [2, 0, 0]
-        if boundary_condition == "zero-slope" or np.isnan(y[-1]):
-            A[-1, 1 : 1 + 3] = [2 * (k[n] - k[n - 1]), 1, 0]
-        elif boundary_condition == "zero-curvature":
-            A[-1, 1 : 1 + 3] = [2, 0, 0]
+        # A4:
+        for i in range(0, n):
+            A[1 + 6 * i, 4 : 4 + 6] = [
+                2 / 5 * (k[i + 1] - k[i]) ** 5,
+                1 / 2 * (k[i + 1] - k[i]) ** 4,
+                2 / 3 * (k[i + 1] - k[i]) ** 3,
+                1 / 3 * (k[i + 1] - k[i]) ** 2,
+                (-((k[i + 1] - k[i]) ** 2) if i != n - 1 else 0),
+                (-2 * (k[i + 1] - k[i]) if i != n - 1 else 0),
+            ]
+            b[1 + 6 * i] = 2 / 3 * y[i] * (k[i + 1] - k[i]) ** 3
+
+        # A5:
+        for i in range(0, n):
+            A[2 + 6 * i, 2 : 2 + 7] = [
+                (1 if i != 0 else 0),
+                1 / 2 * (k[i + 1] - k[i]) ** 4,
+                2 / 3 * (k[i + 1] - k[i]) ** 3,
+                (k[i + 1] - k[i]) ** 2,
+                1 / 2 * (k[i + 1] - k[i]),
+                (-(k[i + 1] - k[i]) if i != n - 1 else 0),
+                (-1 if i != n - 1 else 0),
+            ]
+            b[2 + 6 * i] = y[i] * (k[i + 1] - k[i]) ** 2
+
+        # A6:
+        for i in range(0, n):
+            A[3 + 6 * i, 2 : 2 + 6] = [
+                2 / 3 * (k[i + 1] - k[i]) ** 3,
+                (k[i + 1] - k[i]) ** 2,
+                2 * (k[i + 1] - k[i]),
+                1,
+                (-1 if i != n - 1 else 0),
+                (1 if i != n - 1 else 0),
+            ]
+            b[3 + 6 * i] = 2 * y[i] * (k[i + 1] - k[i])
 
         # Convert matrix A from "row-major banded storage format" (which was easy to construct, as
         #     above) to "column-major banded storage format" (required by
         #     `scipy.linalg.solve_banded`):
-        for col in range(7):
-            A[:, col] = np.roll(A[:, col], shift=(col - 3), axis=0)
+        for col in range(10):
+            A[:, col] = np.roll(A[:, col], shift=(col - 5), axis=0)
         A = np.rot90(A)
 
-        n_below, _ = scipy.linalg.bandwidth(A[::-1])
-        l = u = A.shape[0] - n_below - 1
-        x = scipy.linalg.solve_banded(l_and_u=(l, u), ab=A, b=b)
+        x = scipy.linalg.solve_banded(l_and_u=(5, 4), ab=A, b=b)
 
-        super().__init__(c=x.reshape((n, 3)).T, x=k)
+        super().__init__(c=np.resize(x, 6 * n).reshape((2 * n, 3))[::2].T, x=k)
 
     @staticmethod
     def _convert_knots(knots: list[float]) -> list[float]:
@@ -105,16 +122,11 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
         return knots
 
     @classmethod
-    def from_regular_series(
-        cls,
-        regular_series: pd.Series,
-        boundary_condition: BoundaryCondition = "zero-curvature",
-    ) -> SpecialQuadraticSpline:
+    def from_regular_series(cls, regular_series: pd.Series) -> SpecialQuadraticSpline:
 
         return cls(
             k=SpecialQuadraticSpline._index_to_knots(regular_series.index),
             y=regular_series.to_list(),
-            boundary_condition=boundary_condition,
         )
 
     @staticmethod

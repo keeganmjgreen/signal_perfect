@@ -9,11 +9,10 @@ from special_quadratic_spline import SpecialQuadraticSpline
 
 def test_special_quadratic_spline():
     sqs = SpecialQuadraticSpline(
-        k=[0, 0.5, 2, 3, 4, 5, 6.5, 7, 8],
-        y=[3, 1, 4, 1, 5, 9, 2, 6],
-        boundary_condition="zero-curvature",
+        k=[0, 1, 2],
+        y=[3, 4],
     )
-    series = sqs.get_series(k=[5, 6, 7, 8])
+    series = sqs.get_series(k=[0, 1, 2])
     np.testing.assert_array_almost_equal(series, [10.124367, 4.375632, 6.0])
 
 
@@ -39,7 +38,6 @@ def test_get_regular_series():
     sqs = SpecialQuadraticSpline(
         k=[0, 0.5, 2, 3, 4, 5, 6.5, 7, 8],
         y=[3, 1, 4, 1, 5, 9, 2, 6],
-        boundary_condition="zero-curvature",
     )
     index = pd.RangeIndex(5, 8)
     series = sqs.get_regular_series(index=index)

@@ -5,7 +5,6 @@ from special_quadratic_spline import SpecialQuadraticSpline
 sqs = SpecialQuadraticSpline(
     k=np.array([0, 0.5, 2, 3, 4, 5, 6.5, 7, 8]),
     y=np.array([3, 1, 4, 1, 5, 9, 2, 6]),
-    boundary_condition="zero-curvature",
 )
 sqs.plot(include=["input-data-series"]).write_html("docs/demo/input.html")
 sqs.plot(include=["input-data-series", "spline"]).write_html(
