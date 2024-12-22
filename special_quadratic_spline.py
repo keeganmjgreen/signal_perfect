@@ -26,17 +26,16 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
         n = len(k) - 1
 
         # Initialize matrix A and vector b to zeros.
-        A = np.zeros((6 * n - 2, 10))
+        A = np.zeros((5 * n - 2, 9))
         # ^ Banded storage format (not stored as square matrix).
-        b = np.zeros(6 * n - 2)
+        b = np.zeros(5 * n - 2)
 
         # Set row elements of matrix A corresponding to submatrix A1 (knot constraint):
         for i in range(1, n):
-            A[4 + 6 * (i - 1), 1 : 1 + 9] = [
+            A[3 + 5 * (i - 1), 1 : 1 + 8] = [
                 -((k[i] - k[i - 1]) ** 2),
                 -(k[i] - k[i - 1]),
                 -1,
-                0,
                 0,
                 0,
                 0,
@@ -46,82 +45,63 @@ class SpecialQuadraticSpline(scipy.interpolate.PPoly):
 
         # Set row elements of matrix A corresponding to submatrix A2 (knot derivative constraint):
         for i in range(1, n):
-            A[5 + 6 * (i - 1), 0 : 0 + 9] = [
+            A[4 + 5 * (i - 1), 0 : 0 + 8] = [
                 -2 * (k[i] - k[i - 1]),
                 -1,
                 0,
                 0,
                 0,
                 0,
-                0,
                 1,
                 0,
             ]
 
-        # Set row elements of matrix A corresponding to submatrix A3, and elements of vector b
-        #     corresponding to subvector b3 (interval average constraint):
-        for i in range(0, n):
-            if not np.isnan(y[i]):
-                A[0 + 6 * i, 5 : 5 + 3] = [
-                    2 * (k[i + 1] - k[i]) ** 3,
-                    3 * (k[i + 1] - k[i]) ** 2,
-                    6 * (k[i + 1] - k[i]),
-                ]
-                b[0 + 6 * i] = 6 * y[i] * (k[i + 1] - k[i])
-            else:
-                # This interval's y value is missing. Constrain this interval's spline segment to be
-                #     linear (by constraining its polynomial term a to zero):
-                A[0 + 6 * i, 5] = 1
-
         # A4:
         for i in range(0, n):
-            A[1 + 6 * i, 4 : 4 + 6] = [
+            A[0 + 5 * i, 4 : 4 + 5] = [
                 2 / 5 * (k[i + 1] - k[i]) ** 5,
                 1 / 2 * (k[i + 1] - k[i]) ** 4,
                 2 / 3 * (k[i + 1] - k[i]) ** 3,
-                1 / 3 * (k[i + 1] - k[i]) ** 2,
                 (-((k[i + 1] - k[i]) ** 2) if i != n - 1 else 0),
                 (-2 * (k[i + 1] - k[i]) if i != n - 1 else 0),
             ]
-            b[1 + 6 * i] = 2 / 3 * y[i] * (k[i + 1] - k[i]) ** 3
+            b[0 + 5 * i] = 2 / 3 * y[i] * (k[i + 1] - k[i]) ** 3
 
         # A5:
         for i in range(0, n):
-            A[2 + 6 * i, 2 : 2 + 7] = [
+            A[1 + 5 * i, 2 : 2 + 6] = [
                 (1 if i != 0 else 0),
                 1 / 2 * (k[i + 1] - k[i]) ** 4,
                 2 / 3 * (k[i + 1] - k[i]) ** 3,
                 (k[i + 1] - k[i]) ** 2,
-                1 / 2 * (k[i + 1] - k[i]),
                 (-(k[i + 1] - k[i]) if i != n - 1 else 0),
                 (-1 if i != n - 1 else 0),
             ]
-            b[2 + 6 * i] = y[i] * (k[i + 1] - k[i]) ** 2
+            b[1 + 5 * i] = y[i] * (k[i + 1] - k[i]) ** 2
 
         # A6:
         for i in range(0, n):
-            A[3 + 6 * i, 0 : 0 + 8] = [
+            A[2 + 5 * i, 0 : 0 + 7] = [
                 (1 if i != 0 else 0),
                 0,
                 2 / 3 * (k[i + 1] - k[i]) ** 3,
                 (k[i + 1] - k[i]) ** 2,
                 2 * (k[i + 1] - k[i]),
-                1,
                 (-1 if i != n - 1 else 0),
                 0,
             ]
-            b[3 + 6 * i] = 2 * y[i] * (k[i + 1] - k[i])
+            b[2 + 5 * i] = 2 * y[i] * (k[i + 1] - k[i])
 
         # Convert matrix A from "row-major banded storage format" (which was easy to construct, as
         #     above) to "column-major banded storage format" (required by
         #     `scipy.linalg.solve_banded`):
-        for col in range(10):
-            A[:, col] = np.roll(A[:, col], shift=(col - 5), axis=0)
+        for col in range(9):
+            A[:, col] = np.roll(A[:, col], shift=(col - 4), axis=0)
         A = np.rot90(A)
 
-        x = scipy.linalg.solve_banded(l_and_u=(5, 4), ab=A, b=b)
+        x = scipy.linalg.solve_banded(l_and_u=(4, 4), ab=A, b=b)
 
-        super().__init__(c=np.resize(x, 6 * n).reshape((2 * n, 3))[::2].T, x=k)
+        super().__init__(c=np.resize(x, 5 * n).reshape((n, 5))[:, :3].T, x=k)
 
     @staticmethod
     def _convert_knots(knots: list[float]) -> list[float]:
